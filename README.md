@@ -25,11 +25,42 @@
 
 [Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
 
-## Project setup
+## ⚡ Instalación y Configuración
+
+### 1️⃣ Instalar Dependencias
 
 ```bash
-$ npm install
+npm install
 ```
+
+### 2️⃣ Configurar Variables de Entorno
+
+Crea un archivo `.env` en la raíz del proyecto:
+
+```env
+# Puerto de la aplicación
+PORT=5432
+
+# Credenciales y URI de la Base de Datos MongoDB (datos de ejemplo)
+POSTGRES_USER=YourUsername
+POSTGRES_PASSWORD=YourPassword
+POSTGRES_DB=inmobiliaria_db
+POSTGRES_PORT=5432
+POSTGRES_HOST=localhost
+
+```
+
+---
+
+## 🚀 Ejecución del Proyecto
+
+### 🗄️ Iniciar la Base de Datos
+
+```bash
+docker-compose up -d
+```
+
+> 💡 **Tip:** Verifica que el contenedor esté corriendo con `docker ps`
 
 ## Compile and run the project
 
