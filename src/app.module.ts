@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { DatabaseModule } from './database/database.module';
+//import { DatabaseModule } from './database/database.module';
 import { UserService } from './users/user.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserModule } from './users/user.module';
@@ -9,6 +9,7 @@ import { PropertyModule } from './properties/property.module';
 import { TaskModule } from './tasks/task.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import * as dotenv from 'dotenv';
+import { AuthModule } from './auth/auth.module';
 dotenv.config();
 console.log('ENV:', process.env.POSTGRES_PASSWORD);
 
@@ -22,28 +23,22 @@ console.log({
 
 @Module({
   imports: [
-    ConfigModule.forRoot({
-      isGlobal: true, // Hace que el config esté disponible globalmente
-    }),
-
-    TypeOrmModule.forRootAsync({
-      imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => ({
-        type: 'postgres',
-        host: configService.get<string>('POSTGRES_HOST'),
-        port: configService.get<number>('POSTGRES_PORT'),
-        username: configService.get<string>('POSTGRES_USER'),
-        password: process.env.POSTGRES_PASSWORD,
-        database: configService.get<string>('POSTGRES_DB'),
-        autoLoadEntities: true,
-        synchronize: true,
-      }),
-      inject: [ConfigService],
+    ConfigModule.forRoot(),
+    TypeOrmModule.forRoot({
+      type: 'postgres',
+      host: process.env.POSTGRES_HOST,
+      port: +process.env.POSTGRES_PORT!,
+      database: process.env.POSTGRES_DB,
+      username: process.env.POSTGRES_USER,
+      password: process.env.POSTGRES_PASSWORD,
+      autoLoadEntities: true,
+      synchronize: true, //Solo usarla en ambientes bajos, en prod hacer migraciones
     }),
     UserModule,
     PropertyModule,
     TaskModule,
-    DatabaseModule,
+    AuthModule,
+    //DatabaseModule,
   ],
   controllers: [AppController],
   providers: [AppService],
