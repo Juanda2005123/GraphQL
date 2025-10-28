@@ -1,5 +1,5 @@
-import { UserResponseDto } from './response-user.dto';
-import { PropertyResponseDto } from './response-property.dto';
+import { UserResponseDto } from '../../users/dtos/response-user.dto';
+import { PropertyResponseDto } from '../../properties/dtos/response-property.dto';
 
 export class TaskResponseDto {
   id: string;

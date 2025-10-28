@@ -1,6 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
-import { Property } from './property.model';
-import { Task } from './task.model';
+import { Property } from '../properties/property.model';
+import { Task } from '../tasks/task.model';
 
 export enum UserRole {
   SUPERADMIN = 'superadmin',

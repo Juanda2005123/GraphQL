@@ -1,4 +1,4 @@
-import { UserResponseDto } from './response-user.dto';
+import { UserResponseDto } from '../../users/dtos/response-user.dto';
 
 export class PropertyResponseDto {
   id: string;

@@ -5,7 +5,7 @@ import {
   IsString,
   MinLength,
 } from 'class-validator';
-import { UserRole } from 'src/model/user.model';
+import { UserRole } from 'src/users/user.model';
 
 export class CreateUserDto {
   @IsString()

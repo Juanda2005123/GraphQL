@@ -1,4 +1,4 @@
-import { UserRole } from 'src/model/user.model';
+import { UserRole } from 'src/users/user.model';
 
 export class UserResponseDto {
   id: string;

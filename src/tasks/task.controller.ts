@@ -7,12 +7,12 @@ import {
   Param,
   Body,
 } from '@nestjs/common';
-import { TaskService } from '../service/task.service';
-import { CreateTaskDto } from '../dtos/create-task.dto';
+import { TaskService } from './task.service';
+import { CreateTaskDto } from './dtos/create-task.dto';
 import {
   UpdateTaskByAdminDto,
   UpdateTaskByAgentDto,
-} from 'src/dtos/update-task.dto';
+} from 'src/tasks/dtos/update-task.dto';
 
 @Controller('tasks')
 export class TaskController {

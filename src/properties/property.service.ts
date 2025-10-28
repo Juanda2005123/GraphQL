@@ -1,13 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { User } from '../model/user.model';
-import { Property } from 'src/model/property.model';
-import { CreatePropertyDto } from 'src/dtos/create-property.dto';
+import { User } from '../users/user.model';
+import { Property } from 'src/properties/property.model';
+import { CreatePropertyDto } from 'src/properties/dtos/create-property.dto';
 import {
   UpdatePropertyByAdminDto,
   UpdatePropertyByAgentDto,
-} from '../dtos/update-property.dto';
+} from './dtos/update-property.dto';
 
 @Injectable()
 export class PropertyService {

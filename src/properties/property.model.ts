@@ -5,8 +5,8 @@ import {
   ManyToOne,
   OneToMany,
 } from 'typeorm';
-import { User } from './user.model';
-import { Task } from './task.model';
+import { User } from '../users/user.model';
+import { Task } from '../tasks/task.model';
 
 @Entity()
 export class Property {

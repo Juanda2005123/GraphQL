@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Task } from '../model/task.model';
-import { CreateTaskDto } from '../dtos/create-task.dto';
+import { Task } from './task.model';
+import { CreateTaskDto } from './dtos/create-task.dto';
 import {
   UpdateTaskByAdminDto,
   UpdateTaskByAgentDto,
-} from 'src/dtos/update-task.dto';
+} from 'src/tasks/dtos/update-task.dto';
 
 @Injectable()
 export class TaskService {

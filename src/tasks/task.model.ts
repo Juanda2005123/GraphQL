@@ -1,6 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
-import { Property } from './property.model';
-import { User } from './user.model';
+import { Property } from '../properties/property.model';
+import { User } from '../users/user.model';
 
 @Entity()
 export class Task {

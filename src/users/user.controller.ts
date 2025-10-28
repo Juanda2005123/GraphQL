@@ -7,8 +7,8 @@ import {
   Param,
   Body,
 } from '@nestjs/common';
-import { UserService } from '../service/user.service';
-import { CreateUserDto } from '../dtos/create-user.dto';
+import { UserService } from './user.service';
+import { CreateUserDto } from './dtos/create-user.dto';
 
 @Controller('users')
 export class UserController {

@@ -7,12 +7,12 @@ import {
   Param,
   Body,
 } from '@nestjs/common';
-import { PropertyService } from '../service/property.service';
-import { CreatePropertyDto } from '../dtos/create-property.dto';
+import { PropertyService } from './property.service';
+import { CreatePropertyDto } from './dtos/create-property.dto';
 import {
   UpdatePropertyByAdminDto,
   UpdatePropertyByAgentDto,
-} from 'src/dtos/update-property.dto';
+} from 'src/properties/dtos/update-property.dto';
 
 @Controller('properties')
 export class PropertyController {

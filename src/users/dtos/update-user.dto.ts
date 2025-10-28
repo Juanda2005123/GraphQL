@@ -5,7 +5,7 @@ import {
   MinLength,
   IsEnum,
 } from 'class-validator';
-import { UserRole } from 'src/model/user.model';
+import { UserRole } from 'src/users/user.model';
 
 export class UpdateUserProfileDto {
   @IsOptional()

@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { User } from '../model/user.model';
-import { CreateUserDto } from '../dtos/create-user.dto';
+import { User } from './user.model';
+import { CreateUserDto } from './dtos/create-user.dto';
+import { IsNotEmpty } from 'class-validator';
 
 @Injectable()
 export class UserService {
@@ -31,5 +32,9 @@ export class UserService {
 
   async remove(id: string): Promise<void> {
     await this.userRepo.delete(id);
+  }
+
+  async findByEmail(email: string): Promise<User | null> {
+    return this.userRepo.findOne({ where: { email } });
   }
 }
