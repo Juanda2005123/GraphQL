@@ -6,6 +6,7 @@ import {
   Delete,
   Param,
   Body,
+  UseGuards,
 } from '@nestjs/common';
 import { PropertyService } from './property.service';
 import { CreatePropertyDto } from './dtos/create-property.dto';
@@ -13,7 +14,10 @@ import {
   UpdatePropertyByAdminDto,
   UpdatePropertyByAgentDto,
 } from 'src/properties/dtos/update-property.dto';
+import { AuthGuard } from '@nestjs/passport';
+import { Roles } from 'src/auth/roles.decorator';
 
+@UseGuards(AuthGuard('jwt'))
 @Controller('properties')
 export class PropertyController {
   constructor(private propertyService: PropertyService) {}
@@ -34,6 +38,7 @@ export class PropertyController {
   }
 
   @Put('agent/:id')
+  @Roles('agent')
   updateByAgent(
     @Param('id') id: string,
     @Body() dto: UpdatePropertyByAgentDto,
@@ -42,6 +47,7 @@ export class PropertyController {
   }
 
   @Put('admin/:id')
+  @Roles('superadmin')
   updateByAdmin(
     @Param('id') id: string,
     @Body() dto: UpdatePropertyByAdminDto,

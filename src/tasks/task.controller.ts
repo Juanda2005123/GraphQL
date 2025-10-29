@@ -6,6 +6,7 @@ import {
   Delete,
   Param,
   Body,
+  UseGuards,
 } from '@nestjs/common';
 import { TaskService } from './task.service';
 import { CreateTaskDto } from './dtos/create-task.dto';
@@ -13,7 +14,10 @@ import {
   UpdateTaskByAdminDto,
   UpdateTaskByAgentDto,
 } from 'src/tasks/dtos/update-task.dto';
+import { AuthGuard } from '@nestjs/passport';
+import { Roles } from 'src/auth/roles.decorator';
 
+@UseGuards(AuthGuard('jwt'))
 @Controller('tasks')
 export class TaskController {
   constructor(private taskService: TaskService) {}
@@ -34,11 +38,13 @@ export class TaskController {
   }
 
   @Put('agent/:id')
+  @Roles('agent')
   updateByAgent(@Param('id') id: string, @Body() dto: UpdateTaskByAgentDto) {
     return this.taskService.updateByAgent(id, dto);
   }
 
   @Put('admin/:id')
+  @Roles('superadmin')
   updateByAdmin(@Param('id') id: string, @Body() dto: UpdateTaskByAdminDto) {
     return this.taskService.updateByAdmin(id, dto);
   }

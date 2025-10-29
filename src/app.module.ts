@@ -10,6 +10,7 @@ import { TaskModule } from './tasks/task.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import * as dotenv from 'dotenv';
 import { AuthModule } from './auth/auth.module';
+import { SeedModule } from './seed/seed.module';
 dotenv.config();
 console.log('ENV:', process.env.POSTGRES_PASSWORD);
 
@@ -38,6 +39,7 @@ console.log({
     PropertyModule,
     TaskModule,
     AuthModule,
+    SeedModule,
     //DatabaseModule,
   ],
   controllers: [AppController],
