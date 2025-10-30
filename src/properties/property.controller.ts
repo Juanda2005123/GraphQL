@@ -1,62 +1,105 @@
 import {
+  Body,
   Controller,
+  Delete,
   Get,
+  HttpCode,
+  Param,
   Post,
   Put,
-  Delete,
-  Param,
-  Body,
-  UseGuards,
+  Req,
 } from '@nestjs/common';
+import { Request } from 'express';
+import { Roles } from 'src/auth/roles.decorator';
+import { UserRole } from '../users/user.model';
 import { PropertyService } from './property.service';
-import { CreatePropertyDto } from './dtos/create-property.dto';
+import {
+  CreatePropertyByAdminDto,
+  CreatePropertyByAgentDto,
+} from './dtos/create-property.dto';
 import {
   UpdatePropertyByAdminDto,
   UpdatePropertyByAgentDto,
-} from 'src/properties/dtos/update-property.dto';
-import { AuthGuard } from '@nestjs/passport';
-import { Roles } from 'src/auth/roles.decorator';
+} from './dtos/update-property.dto';
+import {
+  PropertyListResponseDto,
+  PropertyResponseDto,
+} from './dtos/response-property.dto';
+import { Public } from 'src/auth/public.decorator';
 
-@UseGuards(AuthGuard('jwt'))
+interface AuthenticatedRequest extends Request {
+  user: {
+    userId: string;
+    role: UserRole;
+  };
+}
+
 @Controller('properties')
 export class PropertyController {
   constructor(private propertyService: PropertyService) {}
 
-  @Post()
-  create(@Body() createPropertyDto: CreatePropertyDto) {
-    return this.propertyService.create(createPropertyDto);
-  }
-
   @Get()
-  findAll() {
-    return this.propertyService.findAll();
+  @Public()
+  async getPublicList(): Promise<PropertyListResponseDto> {
+    return this.propertyService.listPublic();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.propertyService.findOne(id);
+  @Public()
+  async getPublicOne(@Param('id') id: string): Promise<PropertyResponseDto> {
+    return this.propertyService.getPublicById(id);
+  }
+
+  @Post('agent')
+  @Roles(UserRole.AGENT)
+  async createForAgent(
+    @Req() req: AuthenticatedRequest,
+    @Body() dto: CreatePropertyByAgentDto,
+  ): Promise<PropertyResponseDto> {
+    return this.propertyService.createForAgent(req.user.userId, dto);
   }
 
   @Put('agent/:id')
-  @Roles('agent')
-  updateByAgent(
+  @Roles(UserRole.AGENT)
+  async updateForAgent(
     @Param('id') id: string,
+    @Req() req: AuthenticatedRequest,
     @Body() dto: UpdatePropertyByAgentDto,
-  ) {
-    return this.propertyService.updateByAgent(id, dto);
+  ): Promise<PropertyResponseDto> {
+    return this.propertyService.updateForAgent(id, dto, req.user.userId);
+  }
+
+  @Delete('agent/:id')
+  @Roles(UserRole.AGENT)
+  @HttpCode(204)
+  async removeForAgent(
+    @Param('id') id: string,
+    @Req() req: AuthenticatedRequest,
+  ): Promise<void> {
+    await this.propertyService.removeForAgent(id, req.user.userId);
+  }
+
+  @Post('admin')
+  @Roles(UserRole.SUPERADMIN)
+  async createForAdmin(
+    @Body() dto: CreatePropertyByAdminDto,
+  ): Promise<PropertyResponseDto> {
+    return this.propertyService.createForAdmin(dto);
   }
 
   @Put('admin/:id')
-  @Roles('superadmin')
-  updateByAdmin(
+  @Roles(UserRole.SUPERADMIN)
+  async updateForAdmin(
     @Param('id') id: string,
     @Body() dto: UpdatePropertyByAdminDto,
-  ) {
-    return this.propertyService.updateByAdmin(id, dto);
+  ): Promise<PropertyResponseDto> {
+    return this.propertyService.updateForAdmin(id, dto);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.propertyService.remove(id);
+  @Delete('admin/:id')
+  @Roles(UserRole.SUPERADMIN)
+  @HttpCode(204)
+  async removeForAdmin(@Param('id') id: string): Promise<void> {
+    await this.propertyService.removeForAdmin(id);
   }
 }

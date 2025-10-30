@@ -3,14 +3,13 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
   NotFoundException,
   Param,
   Post,
   Put,
   Req,
-  UseGuards,
 } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
 import { Request } from 'express';
 import { Roles } from 'src/auth/roles.decorator';
 import { UserRole } from './user.model';
@@ -32,7 +31,6 @@ interface AuthenticatedRequest extends Request {
 }
 
 @Controller('users')
-@UseGuards(AuthGuard('jwt'))
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
@@ -55,9 +53,9 @@ export class UserController {
 
   @Delete('me')
   @Roles(UserRole.SUPERADMIN, UserRole.AGENT)
-  async removeProfile(@Req() req: AuthenticatedRequest) {
+  @HttpCode(204)
+  async removeProfile(@Req() req: AuthenticatedRequest): Promise<void> {
     await this.userService.remove(req.user.userId);
-    return { message: 'Account deleted successfully.' };
   }
 
   @Post()
@@ -93,9 +91,9 @@ export class UserController {
 
   @Delete(':id')
   @Roles(UserRole.SUPERADMIN)
-  async remove(@Param('id') id: string) {
+  @HttpCode(204)
+  async remove(@Param('id') id: string): Promise<void> {
     await this.userService.remove(id);
-    return { message: 'User deleted successfully.' };
   }
   private ensureAndMap(user: SafeUser | null): UserResponseDto {
     if (!user) {

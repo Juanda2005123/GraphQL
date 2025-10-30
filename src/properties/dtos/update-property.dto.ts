@@ -38,5 +38,5 @@ export class UpdatePropertyByAgentDto {
 export class UpdatePropertyByAdminDto extends UpdatePropertyByAgentDto {
   @IsOptional()
   @IsString()
-  owner?: string;
+  ownerId?: string;
 }

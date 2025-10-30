@@ -1,5 +1,3 @@
-import { UserResponseDto } from '../../users/dtos/response-user.dto';
-
 export class PropertyResponseDto {
   id: string;
   title: string;
@@ -10,7 +8,7 @@ export class PropertyResponseDto {
   bathrooms: number;
   area: number;
   imageUrls: string[];
-  owner: string | UserResponseDto;
+  ownerId: string | null;
   createdAt: Date;
   updatedAt: Date;
 }

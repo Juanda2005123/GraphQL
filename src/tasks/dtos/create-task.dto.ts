@@ -1,6 +1,6 @@
-import { IsNotEmpty, IsString, MaxLength } from 'class-validator';
+import { IsNotEmpty, IsString, MaxLength, IsUUID } from 'class-validator';
 
-export class CreateTaskDto {
+class BaseTaskDto {
   @IsString()
   @IsNotEmpty()
   @MaxLength(120)
@@ -10,7 +10,13 @@ export class CreateTaskDto {
   @IsNotEmpty()
   description: string;
 
-  @IsString()
-  @IsNotEmpty()
-  property: string;
+  @IsUUID()
+  propertyId: string;
+}
+
+export class CreateTaskByAgentDto extends BaseTaskDto {}
+
+export class CreateTaskByAdminDto extends BaseTaskDto {
+  @IsUUID()
+  assignedToId: string;
 }

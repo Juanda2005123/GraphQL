@@ -28,7 +28,7 @@ export class User {
   isDeleted: boolean; // Soft delete flag
 
   @Column({ type: 'timestamp', nullable: true })
-  deletedAt?: Date;
+  deletedAt?: Date | null;
 
   @Column({ default: false })
   twoFactorEnabled: boolean;

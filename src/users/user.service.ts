@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './user.model';
@@ -9,6 +9,7 @@ import {
 } from './dtos/update-user.dto';
 import { UserListResponseDto, UserResponseDto } from './dtos/response-user.dto';
 import * as bcrypt from 'bcryptjs';
+import { Property } from 'src/properties/property.model';
 
 export type SafeUser = Omit<User, 'password'>;
 
@@ -17,6 +18,8 @@ export class UserService {
   constructor(
     @InjectRepository(User)
     private readonly userRepo: Repository<User>,
+    @InjectRepository(Property)
+    private readonly propertyRepo: Repository<Property>,
   ) {}
 
   async create(dto: CreateUserDto): Promise<SafeUser> {
@@ -67,15 +70,32 @@ export class UserService {
   }
 
   async remove(id: string): Promise<void> {
+    const propertiesCount = await this.propertyRepo.count({
+      where: { isDeleted: false, owner: { id } },
+    });
+
+    if (propertiesCount > 0) {
+      throw new BadRequestException(
+        'Cannot delete user with active properties assigned.',
+      );
+    }
+
     await this.userRepo.update(
       { id, isDeleted: false },
       { isDeleted: true, deletedAt: new Date() },
     );
   }
 
-  async findByEmail(email: string): Promise<User | null> {
+  async findByEmail(
+    email: string,
+    options: { includeDeleted?: boolean } = {},
+  ): Promise<User | null> {
+    const where = options.includeDeleted
+      ? { email }
+      : { email, isDeleted: false };
+
     return this.userRepo.findOne({
-      where: { email, isDeleted: false },
+      where,
       select: {
         id: true,
         name: true,
@@ -89,6 +109,10 @@ export class UserService {
         updatedAt: true,
       },
     });
+  }
+
+  async restore(id: string): Promise<void> {
+    await this.userRepo.update({ id }, { isDeleted: false, deletedAt: null });
   }
 
   private toSafeNullable(user: User | null): SafeUser | null {

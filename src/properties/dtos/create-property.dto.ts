@@ -8,7 +8,7 @@ import {
   MaxLength,
 } from 'class-validator';
 
-export class CreatePropertyDto {
+class BasePropertyDto {
   @IsString()
   @IsNotEmpty()
   @MaxLength(120)
@@ -41,8 +41,12 @@ export class CreatePropertyDto {
   @IsArray()
   @IsString({ each: true })
   imageUrls?: string[];
+}
 
-  @IsOptional()
+export class CreatePropertyByAgentDto extends BasePropertyDto {}
+
+export class CreatePropertyByAdminDto extends BasePropertyDto {
   @IsString()
-  owner?: string;
+  @IsNotEmpty()
+  ownerId: string;
 }

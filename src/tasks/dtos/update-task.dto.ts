@@ -1,4 +1,4 @@
-import { IsOptional, IsString, IsBoolean } from 'class-validator';
+import { IsOptional, IsString, IsBoolean, IsUUID } from 'class-validator';
 
 export class UpdateTaskByAgentDto {
   @IsOptional()
@@ -16,6 +16,10 @@ export class UpdateTaskByAgentDto {
 
 export class UpdateTaskByAdminDto extends UpdateTaskByAgentDto {
   @IsOptional()
-  @IsString()
-  property?: string;
+  @IsUUID()
+  propertyId?: string;
+
+  @IsOptional()
+  @IsUUID()
+  assignedToId?: string;
 }

@@ -1,16 +1,14 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-//import { DatabaseModule } from './database/database.module';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { UserModule } from './users/user.module';
-import { PropertyModule } from './properties/property.module';
-import { TaskModule } from './tasks/task.module';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { AuthModule } from './auth/auth.module';
-import { SeedModule } from './seed/seed.module';
+import { ConfigModule } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
-import { RolesGuard } from './auth/roles.guards';
+import { AuthModule } from './auth/auth.module';
+import { DatabaseModule } from './database/database.module';
+import { PropertyModule } from './properties/property.module';
+import { SeedModule } from './seed/seed.module';
+import { RolesGuard } from './auth/roles.guard';
+import { JwtAuthGuard } from './auth/jwt-auth.guard';
+import { TaskModule } from './tasks/task.module';
+import { UserModule } from './users/user.module';
 
 @Module({
   imports: [
@@ -18,30 +16,18 @@ import { RolesGuard } from './auth/roles.guards';
       isGlobal: true,
       envFilePath: '.env',
     }),
-    TypeOrmModule.forRootAsync({
-      imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => ({
-        type: 'postgres',
-        host: configService.get('POSTGRES_HOST'),
-        port: configService.get('POSTGRES_PORT'),
-        database: configService.get('POSTGRES_DB'),
-        username: configService.get('POSTGRES_USER'),
-        password: configService.get('POSTGRES_PASSWORD'),
-        autoLoadEntities: true,
-        synchronize: true, //Solo usarla en ambientes bajos, en prod hacer migraciones
-      }),
-      inject: [ConfigService],
-    }),
+    DatabaseModule,
     UserModule,
     PropertyModule,
     TaskModule,
     AuthModule,
     SeedModule,
-    //DatabaseModule,
   ],
-  controllers: [AppController],
   providers: [
-    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
     {
       provide: APP_GUARD,
       useClass: RolesGuard,

@@ -40,14 +40,33 @@ export class AuthService {
   }
 
   async register(dto: RegisterUserDto): Promise<UserResponseDto> {
-    const exists = await this.userService.findByEmail(dto.email);
-    if (exists) {
+    const existing = await this.userService.findByEmail(dto.email, {
+      includeDeleted: true,
+    });
+
+    if (existing && !existing.isDeleted) {
       throw new UnauthorizedException('User already exists');
     }
-    const agent = UserRole.AGENT;
+
+    if (existing && existing.isDeleted) {
+      await this.userService.restore(existing.id);
+      const revived = await this.userService.update(existing.id, {
+        name: dto.name,
+        email: dto.email,
+        password: dto.password,
+        role: UserRole.AGENT,
+      });
+
+      if (!revived) {
+        throw new UnauthorizedException('Unable to restore user');
+      }
+
+      return this.userService.toResponseDto(revived);
+    }
+
     const newUser = await this.userService.create({
       ...dto,
-      role: agent,
+      role: UserRole.AGENT,
     });
     return this.userService.toResponseDto(newUser);
   }
