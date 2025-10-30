@@ -10,6 +10,12 @@ async function bootstrap() {
   await seedService.runSeed();
 
   app.useGlobalPipes(new ValidationPipe()); //4 validation
-  await app.listen(process.env.PORT ?? 3000);
+  await app.listen(process.env.PORT ?? 3001);
+  console.log(
+    `🚀 Aplicación corriendo en: http://localhost:${process.env.PORT ?? 3001}`,
+  );
 }
-bootstrap();
+bootstrap().catch((error) => {
+  console.error('Failed to bootstrap NestJS application', error);
+  process.exit(1);
+});

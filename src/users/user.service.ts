@@ -3,8 +3,14 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './user.model';
 import { CreateUserDto } from './dtos/create-user.dto';
-import { IsNotEmpty } from 'class-validator';
+import {
+  UpdateUserByAdminDto,
+  UpdateUserProfileDto,
+} from './dtos/update-user.dto';
+import { UserListResponseDto, UserResponseDto } from './dtos/response-user.dto';
 import * as bcrypt from 'bcryptjs';
+
+export type SafeUser = Omit<User, 'password'>;
 
 @Injectable()
 export class UserService {
@@ -13,30 +19,106 @@ export class UserService {
     private readonly userRepo: Repository<User>,
   ) {}
 
-  async create(dto: CreateUserDto): Promise<User> {
+  async create(dto: CreateUserDto): Promise<SafeUser> {
     const hashedPassword = await bcrypt.hash(dto.password, 10);
     const user = this.userRepo.create({ ...dto, password: hashedPassword });
-    return this.userRepo.save(user);
+    const saved = await this.userRepo.save(user);
+    return this.toSafeUser(saved);
   }
 
-  async findAll(): Promise<User[]> {
-    return this.userRepo.find();
+  async findAll(): Promise<SafeUser[]> {
+    const users = await this.userRepo.find({ where: { isDeleted: false } });
+    return users.map((user) => this.toSafeUser(user));
   }
 
-  async findOne(id: string): Promise<User | null> {
-    return this.userRepo.findOne({ where: { id } });
+  async findOne(id: string): Promise<SafeUser | null> {
+    const user = await this.userRepo.findOne({
+      where: { id, isDeleted: false },
+    });
+    return this.toSafeNullable(user);
   }
 
-  async update(id: string, dto: Partial<CreateUserDto>): Promise<User | null> {
-    await this.userRepo.update(id, dto);
+  async update(
+    id: string,
+    dto: Partial<UpdateUserByAdminDto>,
+  ): Promise<SafeUser | null> {
+    const updatePayload: Partial<User> = { ...dto };
+
+    if (dto.password) {
+      updatePayload.password = await bcrypt.hash(dto.password, 10);
+    }
+
+    await this.userRepo.update({ id, isDeleted: false }, updatePayload);
+    return this.findOne(id);
+  }
+
+  async updateProfile(
+    id: string,
+    dto: UpdateUserProfileDto,
+  ): Promise<SafeUser | null> {
+    const updatePayload: Partial<User> = { ...dto };
+
+    if (dto.password) {
+      updatePayload.password = await bcrypt.hash(dto.password, 10);
+    }
+
+    await this.userRepo.update({ id, isDeleted: false }, updatePayload);
     return this.findOne(id);
   }
 
   async remove(id: string): Promise<void> {
-    await this.userRepo.delete(id);
+    await this.userRepo.update(
+      { id, isDeleted: false },
+      { isDeleted: true, deletedAt: new Date() },
+    );
   }
 
   async findByEmail(email: string): Promise<User | null> {
-    return this.userRepo.findOne({ where: { email } });
+    return this.userRepo.findOne({
+      where: { email, isDeleted: false },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        password: true,
+        role: true,
+        isDeleted: true,
+        twoFactorEnabled: true,
+        twoFactorSecret: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+  }
+
+  private toSafeNullable(user: User | null): SafeUser | null {
+    if (!user) {
+      return null;
+    }
+    return this.toSafeUser(user);
+  }
+
+  toResponseDto(user: SafeUser): UserResponseDto {
+    return {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+    };
+  }
+
+  toListResponse(users: SafeUser[]): UserListResponseDto {
+    return {
+      users: users.map((user) => this.toResponseDto(user)),
+      total: users.length,
+    };
+  }
+
+  private toSafeUser(user: User): SafeUser {
+    const { password: _password, ...safeUser } = user;
+    void _password;
+    return safeUser;
   }
 }

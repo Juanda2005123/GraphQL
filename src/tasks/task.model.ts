@@ -25,7 +25,10 @@ export class Task {
   assignedTo: User;
 
   @Column({ default: false })
-  isDeleted: boolean; // Soft delete
+  isDeleted: boolean; // Soft delete flag
+
+  @Column({ type: 'timestamp', nullable: true })
+  deletedAt?: Date;
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;

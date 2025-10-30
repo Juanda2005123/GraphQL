@@ -1,0 +1,10 @@
+High – Soft deletes absent: user.service.ts, property.service.ts, and task.service.ts call repository.delete and every find* ignores the isDeleted flag, so deletes are permanent and “deleted” records still show up; this breaks the core requirement that all deletes must be soft.
+High – Auth flows misaligned and broken: registration/login live under /auth/* instead of /users/*, /users/me endpoints don’t exist, and there’s no logout; on top of that, AuthService.register (src/auth/auth.service.ts) hashes the password, then UserService.create hashes it again, so stored credentials can’t be validated during login.
+High – Role protection ineffective: controllers decorate handlers with @Roles, but RolesGuard is never applied (no @UseGuards(RolesGuard) nor global guard), so any authenticated user can hit admin/agent routes.
+High – Business rules missing: deleting a user doesn’t check for assigned properties, property deletes don’t cascade soft-deleting tasks, and task/property delete endpoints don’t enforce “only if owner/role” logic.
+Medium – Endpoint surface diverges from the spec: there’s no split between agent/admin routes (POST /properties/agent, /tasks/agent, etc.), no /tasks/property/:propertyId, public property queries are currently behind JWT, and responses don’t use the documented DTOs.
+Medium – Sensitive data leakage: UserService.findAll/findOne return password hashes and deleted users; TaskService.create/DTOs don’t allow setting assignedTo even though relations exist.
+Low – Misc gaps: UserRole enum uses 'agent' while the doc refers to agente, seed runs on every boot without idempotency, and update flows don’t re-hash passwords or refresh timestamps.
+
+
+Queda pendiente implementar la regla “eliminar usuario solo si no tiene propiedades asignadas”; hoy DELETE /users/:id efectúa el soft delete sin validación. Todo lo demás del módulo queda listo y alineado con el documento.

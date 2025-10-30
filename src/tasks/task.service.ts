@@ -26,12 +26,15 @@ export class TaskService {
   }
 
   async findAll(): Promise<Task[]> {
-    return this.taskRepo.find({ relations: ['property', 'assignedTo'] });
+    return this.taskRepo.find({
+      where: { isDeleted: false },
+      relations: ['property', 'assignedTo'],
+    });
   }
 
   async findOne(id: string): Promise<Task | null> {
     return this.taskRepo.findOne({
-      where: { id },
+      where: { id, isDeleted: false },
       relations: ['property', 'assignedTo'],
     });
   }
@@ -40,7 +43,7 @@ export class TaskService {
     id: string,
     updateTaskDto: UpdateTaskByAgentDto,
   ): Promise<Task | null> {
-    await this.taskRepo.update(id, updateTaskDto);
+    await this.taskRepo.update({ id, isDeleted: false }, updateTaskDto);
     return this.findOne(id);
   }
 
@@ -54,11 +57,14 @@ export class TaskService {
         ? { id: updateTaskDto.property }
         : undefined,
     };
-    await this.taskRepo.update(id, updateData);
+    await this.taskRepo.update({ id, isDeleted: false }, updateData);
     return this.findOne(id);
   }
 
   async remove(id: string): Promise<void> {
-    await this.taskRepo.delete(id);
+    await this.taskRepo.update(
+      { id, isDeleted: false },
+      { isDeleted: true, deletedAt: new Date() },
+    );
   }
 }

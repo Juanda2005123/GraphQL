@@ -4,6 +4,11 @@ import { UserService } from '../users/user.service';
 import * as bcrypt from 'bcryptjs';
 import { RegisterUserDto } from './dtos/register-user.dto';
 import { UserRole } from 'src/users/user.model';
+import {
+  AuthResponseDto,
+  UserResponseDto,
+} from 'src/users/dtos/response-user.dto';
+import type { SafeUser } from 'src/users/user.service';
 
 @Injectable()
 export class AuthService {
@@ -12,37 +17,44 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async validateUser(email: string, password: string) {
+  async validateUser(
+    email: string,
+    password: string,
+  ): Promise<SafeUser | null> {
     const user = await this.userService.findByEmail(email);
     if (user && (await bcrypt.compare(password, user.password))) {
-      const { password, ...result } = user;
-      return result;
+      const { password: _password, ...safeUser } = user;
+      void _password;
+      return safeUser;
     }
     return null;
   }
 
-  async login(user: any) {
+  login(user: SafeUser): AuthResponseDto {
     const payload = { username: user.email, sub: user.id, role: user.role };
+    const token = this.jwtService.sign(payload);
     return {
-      access_token: this.jwtService.sign(payload),
-      user,
+      token,
+      user: this.userService.toResponseDto(user),
     };
   }
 
-  async register(dto: RegisterUserDto) {
+  async register(dto: RegisterUserDto): Promise<UserResponseDto> {
     const exists = await this.userService.findByEmail(dto.email);
     if (exists) {
       throw new UnauthorizedException('User already exists');
     }
     const agent = UserRole.AGENT;
-    //Its agent by default ;)
-    // Hashear password antes de guardar
-    const hashedPassword = await bcrypt.hash(dto.password, 10);
     const newUser = await this.userService.create({
       ...dto,
-      password: hashedPassword,
       role: agent,
     });
-    return { id: newUser.id, email: newUser.email, role: newUser.role };
+    return this.userService.toResponseDto(newUser);
+  }
+
+  logout(): { message: string } {
+    return {
+      message: 'Session terminated. Please discard the JWT on the client.',
+    };
   }
 }

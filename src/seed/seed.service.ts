@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { UserService } from '../users/user.service';
 import { PropertyService } from '../properties/property.service';
 import { TaskService } from '../tasks/task.service';
-import * as bcrypt from 'bcryptjs';
 import { UserRole } from 'src/users/user.model';
 
 @Injectable()
@@ -24,13 +23,13 @@ export class SeedService {
       {
         name: 'Admin User',
         email: 'admin@example.com',
-        password: await bcrypt.hash('admin1234', 10),
+        password: 'admin1234',
         role: UserRole.SUPERADMIN,
       },
       {
         name: 'Agent User',
         email: 'agent@example.com',
-        password: await bcrypt.hash('agent1234', 10),
+        password: 'agent1234',
         role: UserRole.AGENT,
       },
     ];

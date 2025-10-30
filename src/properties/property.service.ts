@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { User } from '../users/user.model';
 import { Property } from 'src/properties/property.model';
 import { CreatePropertyDto } from 'src/properties/dtos/create-property.dto';
 import {
@@ -27,21 +26,32 @@ export class PropertyService {
   }
 
   async findAll(): Promise<Property[]> {
-    return this.propertyRepo.find({ relations: ['owner'] });
+    return this.propertyRepo.find({
+      where: { isDeleted: false },
+      relations: ['owner'],
+    });
   }
 
   async findOne(id: string): Promise<Property | null> {
-    return this.propertyRepo.findOne({
-      where: { id },
+    const property = await this.propertyRepo.findOne({
+      where: { id, isDeleted: false },
       relations: ['owner', 'tasks'],
     });
+    if (!property) {
+      return null;
+    }
+    property.tasks = property.tasks?.filter((task) => !task.isDeleted) ?? [];
+    return property;
   }
 
   async updateByAgent(
     id: string,
     updatePropertyByAgentDto: UpdatePropertyByAgentDto,
   ): Promise<Property | null> {
-    await this.propertyRepo.update(id, updatePropertyByAgentDto);
+    await this.propertyRepo.update(
+      { id, isDeleted: false },
+      updatePropertyByAgentDto,
+    );
     return this.findOne(id);
   }
 
@@ -56,10 +66,13 @@ export class PropertyService {
         : undefined,
     };
 
-    await this.propertyRepo.update(id, updateData);
+    await this.propertyRepo.update({ id, isDeleted: false }, updateData);
     return this.findOne(id);
   }
   async remove(id: string): Promise<void> {
-    await this.propertyRepo.delete(id);
+    await this.propertyRepo.update(
+      { id, isDeleted: false },
+      { isDeleted: true, deletedAt: new Date() },
+    );
   }
 }

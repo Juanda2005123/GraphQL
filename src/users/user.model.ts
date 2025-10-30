@@ -25,7 +25,10 @@ export class User {
   role: UserRole;
 
   @Column({ default: false })
-  isDeleted: boolean; // Soft delete
+  isDeleted: boolean; // Soft delete flag
+
+  @Column({ type: 'timestamp', nullable: true })
+  deletedAt?: Date;
 
   @Column({ default: false })
   twoFactorEnabled: boolean;

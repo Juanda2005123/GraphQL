@@ -1,46 +1,106 @@
 import {
+  Body,
   Controller,
+  Delete,
   Get,
+  NotFoundException,
+  Param,
   Post,
   Put,
-  Delete,
-  Param,
-  Body,
+  Req,
   UseGuards,
 } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
+import { Request } from 'express';
+import { Roles } from 'src/auth/roles.decorator';
+import { UserRole } from './user.model';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dtos/create-user.dto';
-import { AuthGuard } from '@nestjs/passport';
-import { Roles } from 'src/auth/roles.decorator';
+import {
+  UpdateUserByAdminDto,
+  UpdateUserProfileDto,
+} from './dtos/update-user.dto';
+import { UserListResponseDto, UserResponseDto } from './dtos/response-user.dto';
+import type { SafeUser } from './user.service';
 
-@UseGuards(AuthGuard('jwt'))
-@Roles('superadmin')
+interface AuthenticatedRequest extends Request {
+  user: {
+    userId: string;
+    email: string;
+    role: UserRole;
+  };
+}
+
 @Controller('users')
+@UseGuards(AuthGuard('jwt'))
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
+  @Get('me')
+  @Roles(UserRole.SUPERADMIN, UserRole.AGENT)
+  async getProfile(@Req() req: AuthenticatedRequest): Promise<UserResponseDto> {
+    const user = await this.userService.findOne(req.user.userId);
+    return this.ensureAndMap(user);
+  }
+
+  @Put('me')
+  @Roles(UserRole.SUPERADMIN, UserRole.AGENT)
+  async updateProfile(
+    @Req() req: AuthenticatedRequest,
+    @Body() dto: UpdateUserProfileDto,
+  ): Promise<UserResponseDto> {
+    const user = await this.userService.updateProfile(req.user.userId, dto);
+    return this.ensureAndMap(user);
+  }
+
+  @Delete('me')
+  @Roles(UserRole.SUPERADMIN, UserRole.AGENT)
+  async removeProfile(@Req() req: AuthenticatedRequest) {
+    await this.userService.remove(req.user.userId);
+    return { message: 'Account deleted successfully.' };
+  }
+
   @Post()
-  create(@Body() dto: CreateUserDto) {
-    return this.userService.create(dto);
+  @Roles(UserRole.SUPERADMIN)
+  async create(@Body() dto: CreateUserDto): Promise<UserResponseDto> {
+    const user = await this.userService.create(dto);
+    return this.userService.toResponseDto(user);
   }
 
   @Get()
-  findAll() {
-    return this.userService.findAll();
+  @Roles(UserRole.SUPERADMIN)
+  async findAll(): Promise<UserListResponseDto> {
+    const users = await this.userService.findAll();
+    return this.userService.toListResponse(users);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.userService.findOne(id);
+  @Roles(UserRole.SUPERADMIN)
+  async findOne(@Param('id') id: string): Promise<UserResponseDto> {
+    const user = await this.userService.findOne(id);
+    return this.ensureAndMap(user);
   }
 
   @Put(':id')
-  update(@Param('id') id: string, @Body() dto: Partial<CreateUserDto>) {
-    return this.userService.update(id, dto);
+  @Roles(UserRole.SUPERADMIN)
+  async update(
+    @Param('id') id: string,
+    @Body() dto: UpdateUserByAdminDto,
+  ): Promise<UserResponseDto> {
+    const user = await this.userService.update(id, dto);
+    return this.ensureAndMap(user);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.userService.remove(id);
+  @Roles(UserRole.SUPERADMIN)
+  async remove(@Param('id') id: string) {
+    await this.userService.remove(id);
+    return { message: 'User deleted successfully.' };
+  }
+  private ensureAndMap(user: SafeUser | null): UserResponseDto {
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    return this.userService.toResponseDto(user);
   }
 }
