@@ -333,28 +333,53 @@ Importa la colección desde: `postman/Inmobiliaria NestJS.postman_collection.jso
 
 ## 🚀 Despliegue
 
-### GitHub Actions CI/CD
+### Producción
 
-El proyecto incluye workflows de GitHub Actions:
+La aplicación está desplegada en **Render**:
 
-**Test Workflow** (`.github/workflows/test.yml`):
+- **🌐 URL Base:** https://real-estate-api-jek0.onrender.com
+- **📚 Swagger UI:** https://real-estate-api-jek0.onrender.com/api/docs
+
+### Usuarios de Prueba (Producción)
+
+Puedes probar la API en producción con estos usuarios:
+
+- **Superadmin:** `admin@example.com` / `admin1234`
+- **Agente 1:** `agent@example.com` / `agent1234`
+- **Agente 2:** `agent.lisa@example.com` / `agentlisa1234`
+
+### CI/CD Pipeline
+
+El proyecto implementa un pipeline completo de despliegue automatizado:
+
+#### GitHub Actions (`.github/workflows/test.yml`)
 - ✅ Ejecuta linter
 - ✅ Ejecuta tests unitarios
 - ✅ Ejecuta tests E2E
 - ✅ Genera reporte de coverage
 
-**Se ejecuta en:**
+**Triggers:**
 - Push a `main` o `develop`
 - Pull requests a `main`
 
-### Despliegue en Producción
+#### Auto-Deploy (Render)
+- ✅ Render detecta cambios en `main` automáticamente
+- ✅ Ejecuta build (`npm run build`)
+- ✅ Inicia aplicación (`npm run start:prod`)
+- ✅ Health check en puerto 10000
 
-(Documentación completa en el informe)
+**Flujo completo:**
+```
+1. Push a main → 2. GitHub Actions (tests) → 3. Tests pasan ✅ → 4. Render auto-deploy → 5. Aplicación en producción 🚀
+```
 
-**Plataformas recomendadas:**
-- Railway
-- Render
-- Heroku
+### Configuración de Producción
+
+**Variables de entorno en Render:**
+- `NODE_ENV=production`
+- `PORT=10000` (configurado por Render)
+- `POSTGRES_*` (credenciales de PostgreSQL de Render)
+- `JWT_SECRET` (secreto único de producción)
 
 ---
 
