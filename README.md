@@ -520,5 +520,3 @@ Para consultas sobre el proyecto, revisar la documentación o abrir un issue en 
 - Comunidad de NestJS
 
 ---
-
-**Desarrollado con ❤️ usando NestJS**
