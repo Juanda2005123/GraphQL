@@ -1,0 +1,1370 @@
+{
+	"info": {
+		"_postman_id": "286865c5-3a65-4c23-a145-3c7bc41dcb3b",
+		"name": "Inmobiliaria GraphQL",
+		"description": "# 🚀 Inmobiliaria GraphQL API\n\nColección completa de operaciones GraphQL para el sistema de inmobiliaria.\n\n## 🔖 **Cómo usar esta colección**\n\n#### **Estructura GraphQL**\n\nTodas las peticiones van a `{{base_url}}/graphql` usando el método POST.\n\n#### **Autenticación**\n\nLa mayoría de operaciones requieren el header `Authorization: Bearer {{jwt_token}}`.\n\n#### **Variables**\n\n- `base_url`: URL base de la API\n- `jwt_token`: Token JWT del agente\n- `jwt_SuperToken`: Token JWT del superadmin\n- `test_property_id`: ID de propiedad para testing\n- `test_task_id`: ID de tarea para testing\n- `test_agent_id`: ID de agente para testing\n\n#### **Módulos**\n\n1. **Auth**: Register, Login, Logout\n2. **Users**: Profile management, Admin operations\n3. **Properties**: CRUD con roles (Agent/Admin)\n4. **Tasks**: CRUD con roles (Agent/Admin)\n\n## 📊 Respuestas GraphQL\n\nLas respuestas tienen la estructura:\n```json\n{\n  \"data\": {\n    \"operationName\": { ... }\n  }\n}\n```\n\nEn caso de error:\n```json\n{\n  \"errors\": [{\n    \"message\": \"Error message\",\n    \"extensions\": { \"code\": \"UNAUTHENTICATED\" }\n  }]\n}\n```",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "43961941",
+		"_collection_link": "https://juancano-6664789.postman.co/workspace/Next~dd7aa765-3992-4040-833f-cffc49fea57c/collection/43961941-286865c5-3a65-4c23-a145-3c7bc41dcb3b?action=share&source=collection_link&creator=43961941"
+	},
+	"item": [
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "Auth | Register",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Auth | Register -> 200\", () => {",
+									"    pm.response.to.have.status(200);",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data).to.have.property('register');",
+									"    pm.expect(jsonData.data.register).to.have.property('token');",
+									"    pm.expect(jsonData.data.register.user).to.have.property('email');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation Register($input: RegisterInput!) {\n  register(input: $input) {\n    token\n    user {\n      id\n      name\n      email\n      role\n      createdAt\n    }\n  }\n}",
+								"variables": "{\n  \"input\": {\n    \"name\": \"Agente 007\",\n    \"email\": \"james.bond@icesi.edu\",\n    \"password\": \"shaken_not_stirred\"\n  }\n}"
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/graphql",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"graphql"
+							]
+						},
+						"description": "Registra un nuevo usuario en el sistema. Por defecto se crea con rol AGENT."
+					},
+					"response": []
+				},
+				{
+					"name": "Auth | Login (Agent)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Auth | Login Agent -> stores token\", function () {",
+									"    pm.response.to.have.status(200);",
+									"    const jsonData = pm.response.json();",
+									"    ",
+									"    if (jsonData.data && jsonData.data.login && jsonData.data.login.token) {",
+									"        pm.collectionVariables.set(\"jwt_token\", jsonData.data.login.token);",
+									"        pm.globals.set(\"jwt_token\", jsonData.data.login.token);",
+									"        pm.environment.set(\"jwt_token\", jsonData.data.login.token);",
+									"        console.log(\"Token JWT de agente guardado.\");",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation Login($input: LoginInput!) {\n  login(input: $input) {\n    token\n    user {\n      id\n      name\n      email\n      role\n    }\n  }\n}",
+								"variables": "{\n  \"input\": {\n    \"email\": \"james.bond@icesi.edu\",\n    \"password\": \"shaken_not_stirred\"\n  }\n}"
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/graphql",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"graphql"
+							]
+						},
+						"description": "Inicia sesión con credenciales de agente y guarda el token JWT."
+					},
+					"response": []
+				},
+				{
+					"name": "Auth | Login (Superadmin)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Auth | Login Superadmin -> stores token\", function () {",
+									"    pm.response.to.have.status(200);",
+									"    const jsonData = pm.response.json();",
+									"    ",
+									"    if (jsonData.data && jsonData.data.login && jsonData.data.login.token) {",
+									"        pm.collectionVariables.set(\"jwt_SuperToken\", jsonData.data.login.token);",
+									"        pm.globals.set(\"jwt_SuperToken\", jsonData.data.login.token);",
+									"        pm.environment.set(\"jwt_SuperToken\", jsonData.data.login.token);",
+									"        console.log(\"Token JWT de superadmin guardado.\");",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation Login($input: LoginInput!) {\n  login(input: $input) {\n    token\n    user {\n      id\n      name\n      email\n      role\n    }\n  }\n}",
+								"variables": "{\n  \"input\": {\n    \"email\": \"juancanodevog@gmail.com\",\n    \"password\": \"SafetyIsFirst\"\n  }\n}"
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/graphql",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"graphql"
+							]
+						},
+						"description": "Inicia sesión como superadmin para operaciones administrativas."
+					},
+					"response": []
+				},
+				{
+					"name": "Auth | Logout",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Auth | Logout -> 200\", () => {",
+									"    pm.response.to.have.status(200);",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data).to.have.property('logout');",
+									"    pm.expect(jsonData.data.logout).to.have.property('message');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation Logout {\n  logout {\n    message\n  }\n}",
+								"variables": ""
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/graphql",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"graphql"
+							]
+						},
+						"description": "Cierra sesión del usuario autenticado."
+					},
+					"response": []
+				},
+				{
+					"name": "Auth | Health Check",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Auth | Health Check -> 200\", () => {",
+									"    pm.response.to.have.status(200);",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data).to.have.property('healthCheck');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query HealthCheck {\n  healthCheck\n}",
+								"variables": ""
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/graphql",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"graphql"
+							]
+						},
+						"description": "Verifica que el servidor GraphQL está funcionando correctamente."
+					},
+					"response": []
+				}
+			],
+			"description": "Operaciones de autenticación y registro de usuarios."
+		},
+		{
+			"name": "Users",
+			"item": [
+				{
+					"name": "Users | Get Me",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Users | Get Me -> 200\", () => {",
+									"    pm.response.to.have.status(200);",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data).to.have.property('me');",
+									"    pm.expect(jsonData.data.me).to.have.property('id');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query Me {\n  me {\n    id\n    name\n    email\n    role\n    createdAt\n    updatedAt\n  }\n}",
+								"variables": ""
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/graphql",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"graphql"
+							]
+						},
+						"description": "Obtiene el perfil del usuario autenticado actual."
+					},
+					"response": []
+				},
+				{
+					"name": "Users | Get User By ID (Admin)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Users | Get User By ID -> 200\", () => {",
+									"    pm.response.to.have.status(200);",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data).to.have.property('user');",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_SuperToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query GetUser($id: String!) {\n  user(id: $id) {\n    id\n    name\n    email\n    role\n    createdAt\n    updatedAt\n  }\n}",
+								"variables": "{\n  \"id\": \"969d4e77-1852-4571-bae0-4cf75c2d4cf1\"\n}"
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/graphql",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"graphql"
+							]
+						},
+						"description": "Obtiene un usuario específico por ID (UUID). Solo para SUPERADMIN. Ejecuta 'Users | Get All Users' primero para obtener un UUID válido."
+					},
+					"response": []
+				},
+				{
+					"name": "Users | Get All Users (Admin)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Users | Get All Users -> 200\", () => {",
+									"    pm.response.to.have.status(200);",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data).to.have.property('users');",
+									"    pm.expect(jsonData.data.users).to.be.an('array');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_SuperToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query GetAllUsers {\n  users {\n    id\n    name\n    email\n    role\n    createdAt\n  }\n}",
+								"variables": ""
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/graphql",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"graphql"
+							]
+						},
+						"description": "Lista todos los usuarios del sistema. Solo para SUPERADMIN."
+					},
+					"response": []
+				},
+				{
+					"name": "Users | Update User Role (Admin)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Users | Update Role -> 200\", () => {",
+									"    pm.response.to.have.status(200);",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data).to.have.property('updateUserRole');",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_SuperToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation UpdateUserRole($id: String!, $input: UpdateUserInput!) {\n  updateUser(id: $id, input: $input) {\n    id\n    name\n    email\n    role\n    updatedAt\n  }\n}",
+								"variables": "{\n  \"id\": \"969d4e77-1852-4571-bae0-4cf75c2d4cf1\",\n  \"input\": {\n    \"role\": \"superadmin\"\n  }\n}"
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/graphql",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"graphql"
+							]
+						},
+						"description": "Actualiza el rol de un usuario. Solo para SUPERADMIN."
+					},
+					"response": []
+				},
+				{
+					"name": "Users | Delete User (Admin)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Users | Delete User -> 200\", () => {",
+									"    pm.response.to.have.status(200);",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data).to.have.property('deleteUser');",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_SuperToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation DeleteUser($id: String!) {\n  deleteUser(id: $id) {\n    message\n  }\n}",
+								"variables": "{\n  \"id\": \"\"\n}"
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/graphql",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"graphql"
+							]
+						},
+						"description": "Elimina un usuario del sistema usando su UUID. Solo para SUPERADMIN."
+					},
+					"response": []
+				}
+			],
+			"description": "Gestión de usuarios y perfiles."
+		},
+		{
+			"name": "Properties",
+			"item": [
+				{
+					"name": "Properties | Create Property (Agent)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Properties | Create -> 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data).to.have.property('createPropertyByAgent');",
+									"    pm.expect(jsonData.data.createPropertyByAgent).to.have.property('id');",
+									"    ",
+									"    if (jsonData.data.createPropertyByAgent.id) {",
+									"        pm.collectionVariables.set(\"test_property_id\", jsonData.data.createPropertyByAgent.id);",
+									"        pm.globals.set(\"test_property_id\", jsonData.data.createPropertyByAgent.id);",
+									"        pm.environment.set(\"test_property_id\", jsonData.data.createPropertyByAgent.id);",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation CreateProperty($input: CreatePropertyByAgentInput!) {\n  createPropertyByAgent(input: $input) {\n    id\n    title\n    description\n    price\n    location\n    bedrooms\n    bathrooms\n    area\n    imageUrls\n    ownerId\n    owner {\n      id\n      name\n      email\n    }\n    createdAt\n  }\n}",
+								"variables": "{\n  \"input\": {\n    \"title\": \"Casa MI6 Headquarters\",\n    \"description\": \"Modern luxury property with high security features\",\n    \"price\": 25000000,\n    \"location\": \"85 Albert Embankment, London\",\n    \"bedrooms\": 5,\n    \"bathrooms\": 4,\n    \"area\": 450,\n    \"imageUrls\": [\"https://mi6.gov.uk/headquarters.jpg\"]\n  }\n}"
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/graphql",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"graphql"
+							]
+						},
+						"description": "Crea una nueva propiedad. El ownerId se asigna automáticamente desde el JWT del agente autenticado."
+					},
+					"response": []
+				},
+				{
+					"name": "Properties | Get All Properties",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Properties | Get All -> 200\", () => {",
+									"    pm.response.to.have.status(200);",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data).to.have.property('properties');",
+									"    pm.expect(jsonData.data.properties).to.have.property('properties');",
+									"    pm.expect(jsonData.data.properties.properties).to.be.an('array');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query GetAllProperties {\n  properties {\n    properties {\n      id\n      title\n      description\n      price\n      location\n      bedrooms\n      bathrooms\n      area\n      ownerId\n      createdAt\n    }\n    total\n  }\n}",
+								"variables": ""
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/graphql",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"graphql"
+							]
+						},
+						"description": "Lista todas las propiedades del sistema. Query pública sin autenticación."
+					},
+					"response": []
+				},
+				{
+					"name": "Properties | Get Property By ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Properties | Get By ID -> 200\", () => {",
+									"    pm.response.to.have.status(200);",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data).to.have.property('property');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query GetProperty($id: ID!) {\n  property(id: $id) {\n    id\n    title\n    description\n    price\n    location\n    bedrooms\n    bathrooms\n    area\n    imageUrls\n    ownerId\n    owner {\n      id\n      name\n      email\n    }\n    createdAt\n    updatedAt\n  }\n}",
+								"variables": "{\n  \"id\": \"51eac5a6-9009-4217-8c37-58ece39cc9dd\"\n}"
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/graphql",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"graphql"
+							]
+						},
+						"description": "Obtiene una propiedad específica por UUID. Query pública sin autenticación."
+					},
+					"response": []
+				},
+				{
+					"name": "Properties | Update Property (Agent)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Properties | Update -> 200\", () => {",
+									"    pm.response.to.have.status(200);",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data).to.have.property('updatePropertyByAgent');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation UpdateProperty($id: ID!, $input: UpdatePropertyByAgentInput!) {\n  updatePropertyByAgent(id: $id, input: $input) {\n    id\n    title\n    description\n    price\n    location\n    bedrooms\n    bathrooms\n    area\n    imageUrls\n    updatedAt\n  }\n}",
+								"variables": "{\n  \"id\": \"51eac5a6-9009-4217-8c37-58ece39cc9dd\",\n  \"input\": {\n    \"price\": 26000000,\n    \"description\": \"Updated luxury property with enhanced security\"\n  }\n}"
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/graphql",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"graphql"
+							]
+						},
+						"description": "Actualiza una propiedad. El agente solo puede actualizar sus propias propiedades."
+					},
+					"response": []
+				},
+				{
+					"name": "Properties | Delete Property (Agent)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Properties | Delete -> 200\", () => {",
+									"    pm.response.to.have.status(200);",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data).to.have.property('deletePropertyByAgent');",
+									"    pm.expect(jsonData.data.deletePropertyByAgent).to.be.a('boolean');",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation DeleteProperty($id: ID!) {\n  deletePropertyByAgent(id: $id)\n}",
+								"variables": "{\n  \"id\": \"6542f6db-fc0e-4fb5-a501-7ea4a48f32cd\"\n}"
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/graphql",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"graphql"
+							]
+						},
+						"description": "Elimina una propiedad. El agente solo puede eliminar sus propias propiedades."
+					},
+					"response": []
+				},
+				{
+					"name": "Properties | Create Property (Admin)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Properties | Create By Admin -> 200\", () => {",
+									"    pm.response.to.have.status(200);",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data).to.have.property('createPropertyByAdmin');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_SuperToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation CreatePropertyByAdmin($input: CreatePropertyByAdminInput!) {\n  createPropertyByAdmin(input: $input) {\n    id\n    title\n    description\n    price\n    location\n    bedrooms\n    bathrooms\n    area\n    imageUrls\n    ownerId\n    owner {\n      id\n      name\n      email\n    }\n    createdAt\n  }\n}",
+								"variables": "{\n  \"input\": {\n    \"title\": \"Admin Created Property\",\n    \"description\": \"Property created by admin for specific agent\",\n    \"price\": 500000,\n    \"location\": \"Admin District\",\n    \"bedrooms\": 3,\n    \"bathrooms\": 2,\n    \"area\": 200,\n    \"imageUrls\": [],\n    \"ownerId\": \"028fd6f3-e3b3-4c9a-bcdf-f4848835b03d\"\n  }\n}"
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/graphql",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"graphql"
+							]
+						},
+						"description": "Admin crea una propiedad y especifica el ownerId (agente propietario). Solo para SUPERADMIN."
+					},
+					"response": []
+				},
+				{
+					"name": "Properties | Update Property (Admin)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Properties | Update By Admin -> 200\", () => {",
+									"    pm.response.to.have.status(200);",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data).to.have.property('updatePropertyByAdmin');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_SuperToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation UpdatePropertyByAdmin($id: ID!, $input: UpdatePropertyByAdminInput!) {\n  updatePropertyByAdmin(id: $id, input: $input) {\n    id\n    title\n    description\n    price\n    location\n    ownerId\n    owner {\n      id\n      name\n      email\n    }\n    updatedAt\n  }\n}",
+								"variables": "{\n  \"id\": \"fc2fc7dd-6d87-4e70-b9c1-15e17562cce3\",\n  \"input\": {\n    \"price\": 200000,\n    \"ownerId\": \"969d4e77-1852-4571-bae0-4cf75c2d4cf1\"\n  }\n}"
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/graphql",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"graphql"
+							]
+						},
+						"description": "Admin actualiza cualquier propiedad y puede cambiar el ownerId (transferir propiedad). Solo para SUPERADMIN."
+					},
+					"response": []
+				},
+				{
+					"name": "Properties | Delete Property (Admin)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Properties | Delete By Admin -> 200\", () => {",
+									"    pm.response.to.have.status(200);",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data).to.have.property('deletePropertyByAdmin');",
+									"    pm.expect(jsonData.data.deletePropertyByAdmin).to.be.a('boolean');",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_SuperToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation DeletePropertyByAdmin($id: ID!) {\n  deletePropertyByAdmin(id: $id)\n}",
+								"variables": "{\n  \"id\": \"031a8fdb-5128-477d-b931-ebf0ffc9db2c\"\n}"
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/graphql",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"graphql"
+							]
+						},
+						"description": "Admin elimina cualquier propiedad del sistema. Solo para SUPERADMIN."
+					},
+					"response": []
+				}
+			],
+			"description": "Gestión de propiedades inmobiliarias con operaciones separadas para agentes y administradores."
+		},
+		{
+			"name": "Tasks",
+			"item": [
+				{
+					"name": "Tasks | Create Task (Agent)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Tasks | Create -> 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data).to.have.property('createTaskByAgent');",
+									"    pm.expect(jsonData.data.createTaskByAgent).to.have.property('id');",
+									"    ",
+									"    // Guardar ID para otras pruebas",
+									"    if (jsonData.data.createTaskByAgent.id) {",
+									"        pm.collectionVariables.set(\"test_task_id\", jsonData.data.createTaskByAgent.id);",
+									"        pm.globals.set(\"test_task_id\", jsonData.data.createTaskByAgent.id);",
+									"        pm.environment.set(\"test_task_id\", jsonData.data.createTaskByAgent.id);",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation CreateTask($input: CreateTaskByAgentInput!) {\n  createTaskByAgent(input: $input) {\n    id\n    title\n    description\n    isCompleted\n    propertyId\n    assignedToId\n    property {\n      id\n      title\n    }\n    assignedTo {\n      id\n      name\n    }\n    createdAt\n  }\n}",
+								"variables": "{\n  \"input\": {\n    \"title\": \"Inspeccionar sistema de seguridad\",\n    \"description\": \"Verificar cámaras y alarmas en todas las instalaciones\",\n    \"propertyId\": \"51eac5a6-9009-4217-8c37-58ece39cc9dd\"\n  }\n}"
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/graphql",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"graphql"
+							]
+						},
+						"description": "Crea una nueva tarea asociada a una propiedad."
+					},
+					"response": []
+				},
+				{
+					"name": "Tasks | Get All Tasks (Admin)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Tasks | Get All -> 200\", () => {",
+									"    pm.response.to.have.status(200);",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data).to.have.property('allTasks');",
+									"    pm.expect(jsonData.data.allTasks).to.have.property('tasks');",
+									"    pm.expect(jsonData.data.allTasks.tasks).to.be.an('array');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_SuperToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query GetAllTasks {\n  allTasks {\n    tasks {\n      id\n      title\n      description\n      isCompleted\n      propertyId\n      assignedToId\n      createdAt\n    }\n    total\n  }\n}",
+								"variables": ""
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/graphql",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"graphql"
+							]
+						},
+						"description": "Lista todas las tareas del sistema."
+					},
+					"response": []
+				},
+				{
+					"name": "Tasks | Get Task By ID (Admin)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Tasks | Get By ID -> 200\", () => {",
+									"    pm.response.to.have.status(200);",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data).to.have.property('task');",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_SuperToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query GetTask($id: ID!) {\n  task(id: $id) {\n    id\n    title\n    description\n    isCompleted\n    propertyId\n    assignedToId\n    assignedTo {\n      id\n      name\n      email\n    }\n    property {\n      id\n      title\n      location\n    }\n    createdAt\n    updatedAt\n  }\n}",
+								"variables": "{\n  \"id\": \"ae85d645-9f7e-4349-b63e-a6a3bcd23fd0\"\n}"
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/graphql",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"graphql"
+							]
+						},
+						"description": "Obtiene una tarea específica por ID."
+					},
+					"response": []
+				},
+				{
+					"name": "Tasks | Get My Tasks (Agent)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Tasks | Get My Tasks -> 200\", () => {",
+									"    pm.response.to.have.status(200);",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data).to.have.property('myTasks');",
+									"    pm.expect(jsonData.data.myTasks).to.be.an('array');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query GetMyTasks {\n  myTasks {\n    tasks {\n      id\n      title\n      description\n      isCompleted\n      propertyId\n      property {\n        id\n        title\n      }\n      createdAt\n    }\n    total\n  }\n}",
+								"variables": ""
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/graphql",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"graphql"
+							]
+						},
+						"description": "Lista todas las tareas del agente autenticado."
+					},
+					"response": []
+				},
+				{
+					"name": "Tasks | Get Tasks By Property",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Tasks | Get By Property -> 200\", () => {",
+									"    pm.response.to.have.status(200);",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data).to.have.property('tasksByProperty');",
+									"    pm.expect(jsonData.data.tasksByProperty).to.be.an('array');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query GetTasksByProperty($propertyId: ID!) {\n  tasksByProperty(propertyId: $propertyId) {\n    tasks {\n      id\n      title\n      description\n      isCompleted\n      assignedTo {\n        id\n        name\n      }\n      createdAt\n    }\n    total\n  }\n}",
+								"variables": "{\n  \"propertyId\": \"51eac5a6-9009-4217-8c37-58ece39cc9dd\"\n}"
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/graphql",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"graphql"
+							]
+						},
+						"description": "Lista todas las tareas de una propiedad específica."
+					},
+					"response": []
+				},
+				{
+					"name": "Tasks | Update Task (Agent)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Tasks | Update -> 200\", () => {",
+									"    pm.response.to.have.status(200);",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data).to.have.property('updateTaskByAgent');",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation UpdateTask($id: ID!, $input: UpdateTaskByAgentInput!) {\n  updateTaskByAgent(id: $id, input: $input) {\n    id\n    title\n    description\n    isCompleted\n    updatedAt\n  }\n}",
+								"variables": "{\n  \"id\": \"ae85d645-9f7e-4349-b63e-a6a3bcd23fd0\",\n  \"input\": {\n    \"isCompleted\": true\n  }\n}"
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/graphql",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"graphql"
+							]
+						},
+						"description": "Actualiza una tarea. El agente solo puede actualizar sus propias tareas."
+					},
+					"response": []
+				},
+				{
+					"name": "Tasks | Delete Task (Agent)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Tasks | Delete -> 200\", () => {",
+									"    pm.response.to.have.status(200);",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data).to.have.property('deleteTaskByAgent');",
+									"    pm.expect(jsonData.data.deleteTaskByAgent).to.be.a('boolean');",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation DeleteTask($id: ID!) {\n  deleteTaskByAgent(id: $id)\n}",
+								"variables": "{\n  \"id\": \"ae85d645-9f7e-4349-b63e-a6a3bcd23fd0\"\n}"
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/graphql",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"graphql"
+							]
+						},
+						"description": "Elimina una tarea. El agente solo puede eliminar sus propias tareas."
+					},
+					"response": []
+				},
+				{
+					"name": "Tasks | Delete Any Task (Admin)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Tasks | Delete Any -> 200\", () => {",
+									"    pm.response.to.have.status(200);",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data).to.have.property('deleteTaskByAdmin');",
+									"    pm.expect(jsonData.data.deleteTaskByAdmin).to.be.a('boolean');",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_SuperToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation DeleteTask($id: ID!) {\n  deleteTaskByAdmin(id: $id)\n}",
+								"variables": "{\n  \"id\": \"ae85d645-9f7e-4349-b63e-a6a3bcd23fd0\"\n}"
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/graphql",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"graphql"
+							]
+						},
+						"description": "Elimina cualquier tarea del sistema. Solo para SUPERADMIN."
+					},
+					"response": []
+				}
+			],
+			"description": "Gestión de tareas asociadas a propiedades."
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:3000",
+			"type": "string"
+		},
+		{
+			"key": "jwt_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "jwt_SuperToken",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "test_property_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "test_task_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "test_agent_id",
+			"value": "",
+			"type": "string"
+		}
+	]
+}

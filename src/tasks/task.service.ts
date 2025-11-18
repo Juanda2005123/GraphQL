@@ -181,8 +181,8 @@ export class TaskService {
       title: task.title,
       description: task.description,
       isCompleted: task.isCompleted,
-      propertyId: task.property ? task.property.id : null,
-      assignedToId: task.assignedTo ? task.assignedTo.id : null,
+      propertyId: task.property ? task.property.id : undefined, // Changed from null to undefined
+      assignedToId: task.assignedTo ? task.assignedTo.id : undefined, // Changed from null to undefined
       createdAt: task.createdAt,
       updatedAt: task.updatedAt,
     };

@@ -135,7 +135,7 @@ export class PropertyService {
       bathrooms: property.bathrooms,
       area: property.area,
       imageUrls: property.imageUrls ?? [],
-      ownerId: property.owner ? property.owner.id : null,
+      ownerId: property.owner ? property.owner.id : undefined, // Changed from null to undefined
       createdAt: property.createdAt,
       updatedAt: property.updatedAt,
     };

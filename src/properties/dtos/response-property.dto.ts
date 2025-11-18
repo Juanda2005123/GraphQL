@@ -61,7 +61,7 @@ export class PropertyResponseDto {
     example: '550e8400-e29b-41d4-a716-446655440000',
     nullable: true,
   })
-  ownerId: string | null;
+  ownerId?: string; // Changed from string | null to string | undefined for GraphQL compatibility
 
   @ApiProperty({
     description: 'Fecha de creación',

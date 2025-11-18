@@ -30,14 +30,14 @@ export class TaskResponseDto {
     example: '550e8400-e29b-41d4-a716-446655440000',
     nullable: true,
   })
-  propertyId: string | null;
+  propertyId?: string; // Changed from string | null to string | undefined for GraphQL compatibility
 
   @ApiProperty({
     description: 'ID del usuario asignado',
     example: '550e8400-e29b-41d4-a716-446655440000',
     nullable: true,
   })
-  assignedToId: string | null;
+  assignedToId?: string; // Changed from string | null to string | undefined for GraphQL compatibility
 
   @ApiProperty({
     description: 'Fecha de creación',

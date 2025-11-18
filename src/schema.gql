@@ -10,6 +10,90 @@ type AuthResponse {
   user: UserType!
 }
 
+"""Datos para crear propiedad como admin con ownerId"""
+input CreatePropertyByAdminInput {
+  """Área en m²"""
+  area: Float!
+
+  """Número de baños"""
+  bathrooms: Int!
+
+  """Número de habitaciones"""
+  bedrooms: Int!
+
+  """Descripción de la propiedad"""
+  description: String!
+
+  """URLs de imágenes (opcional)"""
+  imageUrls: [String!]
+
+  """Ubicación de la propiedad"""
+  location: String!
+
+  """ID del usuario propietario"""
+  ownerId: ID!
+
+  """Precio en USD"""
+  price: Float!
+
+  """Título de la propiedad"""
+  title: String!
+}
+
+"""Datos para crear propiedad como agente"""
+input CreatePropertyByAgentInput {
+  """Área en m²"""
+  area: Float!
+
+  """Número de baños"""
+  bathrooms: Int!
+
+  """Número de habitaciones"""
+  bedrooms: Int!
+
+  """Descripción de la propiedad"""
+  description: String!
+
+  """URLs de imágenes (opcional)"""
+  imageUrls: [String!]
+
+  """Ubicación de la propiedad"""
+  location: String!
+
+  """Precio en USD"""
+  price: Float!
+
+  """Título de la propiedad"""
+  title: String!
+}
+
+"""Datos para crear tarea como admin con assignedToId"""
+input CreateTaskByAdminInput {
+  """ID del usuario asignado (debe ser AGENT)"""
+  assignedToId: ID!
+
+  """Descripción de la tarea"""
+  description: String!
+
+  """ID de la propiedad asociada (debe ser del agente)"""
+  propertyId: ID!
+
+  """Título de la tarea"""
+  title: String!
+}
+
+"""Datos para crear tarea como agente (auto-asignación)"""
+input CreateTaskByAgentInput {
+  """Descripción de la tarea"""
+  description: String!
+
+  """ID de la propiedad asociada (debe ser del agente)"""
+  propertyId: ID!
+
+  """Título de la tarea"""
+  title: String!
+}
+
 """Datos para crear un nuevo usuario (solo superadmin)"""
 input CreateUserInput {
   """Correo electrónico único del usuario"""
@@ -49,11 +133,35 @@ type LogoutResponse {
 }
 
 type Mutation {
+  """Crear propiedad como admin especificando el propietario"""
+  createPropertyByAdmin(input: CreatePropertyByAdminInput!): Property!
+
+  """Crear propiedad como agente (se asigna automáticamente como owner)"""
+  createPropertyByAgent(input: CreatePropertyByAgentInput!): Property!
+
+  """Crear tarea como admin especificando el asignado"""
+  createTaskByAdmin(input: CreateTaskByAdminInput!): TaskGQL!
+
+  """Crear tarea como agente (auto-asignación)"""
+  createTaskByAgent(input: CreateTaskByAgentInput!): TaskGQL!
+
   """Crear un nuevo usuario con cualquier rol (solo superadmin)"""
   createUser(input: CreateUserInput!): User!
 
   """Eliminar (soft delete) la cuenta propia del usuario autenticado"""
   deleteProfile: DeleteResponse!
+
+  """Eliminar (soft delete) cualquier propiedad como admin"""
+  deletePropertyByAdmin(id: ID!): Boolean!
+
+  """Eliminar (soft delete) propiedad propia como agente"""
+  deletePropertyByAgent(id: ID!): Boolean!
+
+  """Eliminar (soft delete) cualquier tarea como admin"""
+  deleteTaskByAdmin(id: ID!): Boolean!
+
+  """Eliminar (soft delete) tarea propia como agente"""
+  deleteTaskByAgent(id: ID!): Boolean!
 
   """Eliminar (soft delete) un usuario por ID (solo superadmin)"""
   deleteUser(id: String!): DeleteResponse!
@@ -70,16 +178,106 @@ type Mutation {
   """Actualizar el perfil propio del usuario autenticado"""
   updateProfile(input: UpdateProfileInput!): User!
 
+  """Actualizar cualquier propiedad como admin (puede cambiar owner)"""
+  updatePropertyByAdmin(id: ID!, input: UpdatePropertyByAdminInput!): Property!
+
+  """Actualizar propiedad propia como agente"""
+  updatePropertyByAgent(id: ID!, input: UpdatePropertyByAgentInput!): Property!
+
+  """Actualizar cualquier tarea como admin (puede reasignar)"""
+  updateTaskByAdmin(id: ID!, input: UpdateTaskByAdminInput!): TaskGQL!
+
+  """Actualizar tarea propia como agente"""
+  updateTaskByAgent(id: ID!, input: UpdateTaskByAgentInput!): TaskGQL!
+
   """Actualizar cualquier usuario por ID (solo superadmin)"""
   updateUser(id: String!, input: UpdateUserInput!): User!
 }
 
+"""Propiedad inmobiliaria con detalles completos"""
+type Property {
+  """Área en metros cuadrados"""
+  area: Float!
+
+  """Número de baños"""
+  bathrooms: Int!
+
+  """Número de habitaciones"""
+  bedrooms: Int!
+
+  """Fecha de creación de la propiedad"""
+  createdAt: DateTime!
+
+  """Descripción detallada de la propiedad"""
+  description: String!
+
+  """Identificador único de la propiedad"""
+  id: ID!
+
+  """URLs de las imágenes de la propiedad"""
+  imageUrls: [String!]!
+
+  """Ubicación/dirección de la propiedad"""
+  location: String!
+
+  """Usuario propietario de la propiedad"""
+  owner: User
+
+  """ID del propietario"""
+  ownerId: ID
+
+  """Precio de la propiedad en USD"""
+  price: Float!
+
+  """Tareas asociadas a la propiedad"""
+  tasks: [Task!]!
+
+  """Título descriptivo de la propiedad"""
+  title: String!
+
+  """Fecha de última actualización"""
+  updatedAt: DateTime!
+}
+
+"""Lista de propiedades con información de paginación"""
+type PropertyList {
+  """Array de propiedades"""
+  properties: [Property!]!
+
+  """Número total de propiedades"""
+  total: Int!
+}
+
 type Query {
+  """Lista todas las tareas del sistema (admin)"""
+  allTasks: TaskList!
+
   """Health check para GraphQL"""
   healthCheck: String!
 
   """Obtener el perfil del usuario autenticado actual"""
   me: User!
+
+  """Obtiene una tarea específica del agente autenticado"""
+  myTask(id: ID!): TaskGQL!
+
+  """Lista todas las tareas del agente autenticado"""
+  myTasks: TaskList!
+
+  """Lista todas las propiedades activas (acceso público)"""
+  properties: PropertyList!
+
+  """Obtiene una propiedad por ID (acceso público)"""
+  property(id: ID!): Property!
+
+  """Obtiene cualquier tarea por ID (admin)"""
+  task(id: ID!): TaskGQL!
+
+  """Lista tareas de una propiedad del agente"""
+  tasksByProperty(propertyId: ID!): TaskList!
+
+  """Lista tareas de cualquier propiedad (admin)"""
+  tasksByPropertyAdmin(propertyId: ID!): TaskList!
 
   """Obtener un usuario específico por ID (solo superadmin)"""
   user(id: String!): User!
@@ -101,6 +299,52 @@ input RegisterInput {
   password: String!
 }
 
+type Task {
+  id: ID!
+}
+
+"""Tarea de mantenimiento o gestión de propiedad"""
+type TaskGQL {
+  """Usuario asignado a la tarea"""
+  assignedTo: User
+
+  """ID del usuario asignado"""
+  assignedToId: ID
+
+  """Fecha de creación de la tarea"""
+  createdAt: DateTime!
+
+  """Descripción detallada de la tarea"""
+  description: String!
+
+  """Identificador único de la tarea"""
+  id: ID!
+
+  """Estado de completitud de la tarea"""
+  isCompleted: Boolean!
+
+  """Propiedad asociada a la tarea"""
+  property: Property
+
+  """ID de la propiedad asociada"""
+  propertyId: ID
+
+  """Título de la tarea"""
+  title: String!
+
+  """Fecha de última actualización"""
+  updatedAt: DateTime!
+}
+
+"""Lista de tareas con información de paginación"""
+type TaskList {
+  """Array de tareas"""
+  tasks: [TaskGQL!]!
+
+  """Número total de tareas"""
+  total: Int!
+}
+
 """Datos para actualizar el perfil propio del usuario"""
 input UpdateProfileInput {
   """Correo electrónico del usuario"""
@@ -111,6 +355,93 @@ input UpdateProfileInput {
 
   """Nueva contraseña (mínimo 8 caracteres)"""
   password: String
+}
+
+"""Datos para actualizar propiedad como admin (incluye cambio de owner)"""
+input UpdatePropertyByAdminInput {
+  """Nueva área"""
+  area: Float
+
+  """Nuevo número de baños"""
+  bathrooms: Int
+
+  """Nuevo número de habitaciones"""
+  bedrooms: Int
+
+  """Nueva descripción"""
+  description: String
+
+  """Nuevas URLs de imágenes"""
+  imageUrls: [String!]
+
+  """Nueva ubicación"""
+  location: String
+
+  """Nuevo ID del propietario"""
+  ownerId: ID
+
+  """Nuevo precio"""
+  price: Float
+
+  """Nuevo título"""
+  title: String
+}
+
+"""Datos para actualizar propiedad como agente"""
+input UpdatePropertyByAgentInput {
+  """Nueva área"""
+  area: Float
+
+  """Nuevo número de baños"""
+  bathrooms: Int
+
+  """Nuevo número de habitaciones"""
+  bedrooms: Int
+
+  """Nueva descripción"""
+  description: String
+
+  """Nuevas URLs de imágenes"""
+  imageUrls: [String!]
+
+  """Nueva ubicación"""
+  location: String
+
+  """Nuevo precio"""
+  price: Float
+
+  """Nuevo título"""
+  title: String
+}
+
+"""Datos para actualizar tarea como admin (incluye reasignación)"""
+input UpdateTaskByAdminInput {
+  """Nuevo ID del usuario asignado"""
+  assignedToId: ID
+
+  """Nueva descripción"""
+  description: String
+
+  """Nuevo estado de completitud"""
+  isCompleted: Boolean
+
+  """Nuevo ID de la propiedad"""
+  propertyId: ID
+
+  """Nuevo título"""
+  title: String
+}
+
+"""Datos para actualizar tarea como agente"""
+input UpdateTaskByAgentInput {
+  """Nueva descripción"""
+  description: String
+
+  """Nuevo estado de completitud"""
+  isCompleted: Boolean
+
+  """Nuevo título"""
+  title: String
 }
 
 """Datos para actualizar un usuario (solo superadmin)"""
