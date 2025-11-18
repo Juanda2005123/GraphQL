@@ -6,8 +6,11 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  // CORS configurado para desarrollo y producción
   app.enableCors({
-    origin: 'http://localhost:3000',
+    origin: process.env.NODE_ENV === 'production' 
+      ? true // Permite cualquier origen en producción (o especifica tu frontend)
+      : 'http://localhost:3000',
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization'],
@@ -48,9 +51,10 @@ async function bootstrap() {
 
   app.useGlobalPipes(new ValidationPipe());
   const port = process.env.PORT ?? 3001;
-  await app.listen(port);
+  await app.listen(port, '0.0.0.0'); // Escuchar en todas las interfaces (requerido para Render)
 
   console.log(`🚀 Aplicación corriendo en: http://localhost:${port}`);
+  console.log(`📊 GraphQL Playground: http://localhost:${port}/graphql`);
   console.log(`📚 Documentación Swagger: http://localhost:${port}/api/docs`);
 }
 bootstrap().catch((error) => {
