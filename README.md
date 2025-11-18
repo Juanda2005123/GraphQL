@@ -15,8 +15,8 @@
 | **Juan Andrés Cano** | 
 
 **Universidad:** Universidad Icesi  
-**Curso:** Computación 3  
-**Fecha:** Noviembre 2024
+**Curso:** Computación en Internet 3  
+**Fecha:** 18 Noviembre 2025
 
 </div>
 
