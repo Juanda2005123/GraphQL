@@ -1,0 +1,162 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type AuthResponse {
+  """Token JWT de autenticación"""
+  token: String!
+
+  """Datos del usuario autenticado"""
+  user: UserType!
+}
+
+"""Datos para crear un nuevo usuario (solo superadmin)"""
+input CreateUserInput {
+  """Correo electrónico único del usuario"""
+  email: String!
+
+  """Nombre completo del usuario"""
+  name: String!
+
+  """Contraseña del usuario (mínimo 8 caracteres)"""
+  password: String!
+
+  """Rol del usuario en el sistema"""
+  role: String!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+"""Respuesta de confirmación para operaciones de eliminación"""
+type DeleteResponse {
+  """Mensaje de confirmación"""
+  message: String!
+}
+
+input LoginInput {
+  """Correo electrónico del usuario"""
+  email: String!
+
+  """Contraseña del usuario"""
+  password: String!
+}
+
+type LogoutResponse {
+  message: String!
+}
+
+type Mutation {
+  """Crear un nuevo usuario con cualquier rol (solo superadmin)"""
+  createUser(input: CreateUserInput!): User!
+
+  """Eliminar (soft delete) la cuenta propia del usuario autenticado"""
+  deleteProfile: DeleteResponse!
+
+  """Eliminar (soft delete) un usuario por ID (solo superadmin)"""
+  deleteUser(id: String!): DeleteResponse!
+
+  """Iniciar sesión con email y contraseña"""
+  login(input: LoginInput!): AuthResponse!
+
+  """Cerrar sesión (el cliente debe descartar el token JWT)"""
+  logout: LogoutResponse!
+
+  """Registrar un nuevo usuario con rol de agente"""
+  register(input: RegisterInput!): AuthResponse!
+
+  """Actualizar el perfil propio del usuario autenticado"""
+  updateProfile(input: UpdateProfileInput!): User!
+
+  """Actualizar cualquier usuario por ID (solo superadmin)"""
+  updateUser(id: String!, input: UpdateUserInput!): User!
+}
+
+type Query {
+  """Health check para GraphQL"""
+  healthCheck: String!
+
+  """Obtener el perfil del usuario autenticado actual"""
+  me: User!
+
+  """Obtener un usuario específico por ID (solo superadmin)"""
+  user(id: String!): User!
+
+  """
+  Lista de todos los usuarios - accesible para cualquier usuario autenticado
+  """
+  users: [User!]!
+}
+
+input RegisterInput {
+  """Correo electrónico del usuario"""
+  email: String!
+
+  """Nombre completo del usuario"""
+  name: String!
+
+  """Contraseña del usuario"""
+  password: String!
+}
+
+"""Datos para actualizar el perfil propio del usuario"""
+input UpdateProfileInput {
+  """Correo electrónico del usuario"""
+  email: String
+
+  """Nombre completo del usuario"""
+  name: String
+
+  """Nueva contraseña (mínimo 8 caracteres)"""
+  password: String
+}
+
+"""Datos para actualizar un usuario (solo superadmin)"""
+input UpdateUserInput {
+  """Correo electrónico del usuario"""
+  email: String
+
+  """Nombre completo del usuario"""
+  name: String
+
+  """Nueva contraseña (mínimo 8 caracteres)"""
+  password: String
+
+  """Rol del usuario"""
+  role: String
+}
+
+"""Usuario del sistema con roles de autenticación"""
+type User {
+  """Fecha de creación del usuario"""
+  createdAt: DateTime!
+
+  """Correo electrónico único del usuario"""
+  email: String!
+
+  """Identificador único del usuario (UUID)"""
+  id: ID!
+
+  """Indica si el usuario ha sido eliminado (soft delete)"""
+  isDeleted: Boolean!
+
+  """Nombre completo del usuario"""
+  name: String!
+
+  """Rol del usuario en el sistema"""
+  role: String!
+
+  """Fecha de última actualización del usuario"""
+  updatedAt: DateTime!
+}
+
+type UserType {
+  createdAt: DateTime!
+  email: String!
+  id: String!
+  name: String!
+  role: String!
+  updatedAt: DateTime!
+}

@@ -2,10 +2,16 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { SeedService } from './seed/seed.service';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  app.enableCors({
+    origin: 'http://localhost:3000',
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  });
 
   app.setGlobalPrefix('api');
 
@@ -40,14 +46,10 @@ async function bootstrap() {
     customCss: '.swagger-ui .topbar { display: none }',
   });
 
-  const seedService = app.get(SeedService);
-  await seedService.runSeed();
-
   app.useGlobalPipes(new ValidationPipe());
-  
   const port = process.env.PORT ?? 3001;
   await app.listen(port);
-  
+
   console.log(`🚀 Aplicación corriendo en: http://localhost:${port}`);
   console.log(`📚 Documentación Swagger: http://localhost:${port}/api/docs`);
 }

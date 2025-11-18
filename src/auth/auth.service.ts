@@ -2,12 +2,8 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from '../users/user.service';
 import * as bcrypt from 'bcryptjs';
-import { RegisterUserDto } from './dtos/register-user.dto';
+import { RegisterInput, AuthResponse } from './dto/auth.types';
 import { UserRole } from 'src/users/user.model';
-import {
-  AuthResponseDto,
-  UserResponseDto,
-} from 'src/users/dtos/response-user.dto';
 import type { SafeUser } from 'src/users/user.service';
 
 @Injectable()
@@ -30,16 +26,23 @@ export class AuthService {
     return null;
   }
 
-  login(user: SafeUser): AuthResponseDto {
+  login(user: SafeUser): AuthResponse {
     const payload = { username: user.email, sub: user.id, role: user.role };
     const token = this.jwtService.sign(payload);
     return {
       token,
-      user: this.userService.toResponseDto(user),
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+      },
     };
   }
 
-  async register(dto: RegisterUserDto): Promise<UserResponseDto> {
+  async register(dto: RegisterInput): Promise<AuthResponse> {
     const existing = await this.userService.findByEmail(dto.email, {
       includeDeleted: true,
     });
@@ -47,6 +50,8 @@ export class AuthService {
     if (existing && !existing.isDeleted) {
       throw new UnauthorizedException('User already exists');
     }
+
+    let user: SafeUser;
 
     if (existing && existing.isDeleted) {
       await this.userService.restore(existing.id);
@@ -61,14 +66,17 @@ export class AuthService {
         throw new UnauthorizedException('Unable to restore user');
       }
 
-      return this.userService.toResponseDto(revived);
+      user = revived;
+    } else {
+      const newUser = await this.userService.create({
+        ...dto,
+        role: UserRole.AGENT,
+      });
+      user = newUser;
     }
 
-    const newUser = await this.userService.create({
-      ...dto,
-      role: UserRole.AGENT,
-    });
-    return this.userService.toResponseDto(newUser);
+    // Retornar token JWT junto con usuario
+    return this.login(user);
   }
 
   logout(): { message: string } {

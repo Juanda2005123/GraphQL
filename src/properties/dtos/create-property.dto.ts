@@ -69,7 +69,10 @@ class BasePropertyDto {
 
   @ApiProperty({
     description: 'URLs de las imágenes de la propiedad',
-    example: ['https://example.com/image1.jpg', 'https://example.com/image2.jpg'],
+    example: [
+      'https://example.com/image1.jpg',
+      'https://example.com/image2.jpg',
+    ],
     required: false,
     type: [String],
   })

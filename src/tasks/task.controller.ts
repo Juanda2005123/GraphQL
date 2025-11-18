@@ -48,7 +48,8 @@ export class TaskController {
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Listar tareas del agente',
-    description: 'El agente lista todas sus tareas (de propiedades que le pertenecen)',
+    description:
+      'El agente lista todas sus tareas (de propiedades que le pertenecen)',
   })
   @ApiResponse({
     status: 200,
@@ -56,7 +57,10 @@ export class TaskController {
     type: TaskListResponseDto,
   })
   @ApiResponse({ status: 401, description: 'No autenticado' })
-  @ApiResponse({ status: 403, description: 'Sin permisos (requiere rol agente)' })
+  @ApiResponse({
+    status: 403,
+    description: 'Sin permisos (requiere rol agente)',
+  })
   async listForAgent(
     @Req() req: AuthenticatedRequest,
   ): Promise<TaskListResponseDto> {
@@ -76,7 +80,10 @@ export class TaskController {
     type: TaskResponseDto,
   })
   @ApiResponse({ status: 401, description: 'No autenticado' })
-  @ApiResponse({ status: 403, description: 'Sin permisos o propiedad no pertenece al agente' })
+  @ApiResponse({
+    status: 403,
+    description: 'Sin permisos o propiedad no pertenece al agente',
+  })
   @ApiResponse({ status: 404, description: 'Propiedad no encontrada' })
   async createForAgent(
     @Req() req: AuthenticatedRequest,
@@ -99,7 +106,10 @@ export class TaskController {
     type: TaskResponseDto,
   })
   @ApiResponse({ status: 401, description: 'No autenticado' })
-  @ApiResponse({ status: 403, description: 'Sin permisos o tarea no pertenece al agente' })
+  @ApiResponse({
+    status: 403,
+    description: 'Sin permisos o tarea no pertenece al agente',
+  })
   @ApiResponse({ status: 404, description: 'Tarea no encontrada' })
   async getForAgent(
     @Req() req: AuthenticatedRequest,
@@ -113,7 +123,8 @@ export class TaskController {
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Listar tareas por propiedad (Agente)',
-    description: 'El agente lista tareas de una propiedad específica que le pertenece',
+    description:
+      'El agente lista tareas de una propiedad específica que le pertenece',
   })
   @ApiParam({ name: 'propertyId', description: 'ID de la propiedad' })
   @ApiResponse({
@@ -122,7 +133,10 @@ export class TaskController {
     type: TaskListResponseDto,
   })
   @ApiResponse({ status: 401, description: 'No autenticado' })
-  @ApiResponse({ status: 403, description: 'Sin permisos o propiedad no pertenece al agente' })
+  @ApiResponse({
+    status: 403,
+    description: 'Sin permisos o propiedad no pertenece al agente',
+  })
   @ApiResponse({ status: 404, description: 'Propiedad no encontrada' })
   async listByPropertyForAgent(
     @Req() req: AuthenticatedRequest,
@@ -145,7 +159,10 @@ export class TaskController {
     type: TaskResponseDto,
   })
   @ApiResponse({ status: 401, description: 'No autenticado' })
-  @ApiResponse({ status: 403, description: 'Sin permisos o tarea no pertenece al agente' })
+  @ApiResponse({
+    status: 403,
+    description: 'Sin permisos o tarea no pertenece al agente',
+  })
   @ApiResponse({ status: 404, description: 'Tarea no encontrada' })
   async updateForAgent(
     @Req() req: AuthenticatedRequest,
@@ -166,7 +183,10 @@ export class TaskController {
   @ApiParam({ name: 'id', description: 'ID de la tarea' })
   @ApiResponse({ status: 204, description: 'Tarea eliminada exitosamente' })
   @ApiResponse({ status: 401, description: 'No autenticado' })
-  @ApiResponse({ status: 403, description: 'Sin permisos o tarea no pertenece al agente' })
+  @ApiResponse({
+    status: 403,
+    description: 'Sin permisos o tarea no pertenece al agente',
+  })
   @ApiResponse({ status: 404, description: 'Tarea no encontrada' })
   async removeForAgent(
     @Req() req: AuthenticatedRequest,
@@ -188,7 +208,10 @@ export class TaskController {
     type: TaskListResponseDto,
   })
   @ApiResponse({ status: 401, description: 'No autenticado' })
-  @ApiResponse({ status: 403, description: 'Sin permisos (requiere rol superadmin)' })
+  @ApiResponse({
+    status: 403,
+    description: 'Sin permisos (requiere rol superadmin)',
+  })
   async listForAdmin(): Promise<TaskListResponseDto> {
     return this.taskService.listForAdmin();
   }
@@ -206,7 +229,10 @@ export class TaskController {
     type: TaskResponseDto,
   })
   @ApiResponse({ status: 401, description: 'No autenticado' })
-  @ApiResponse({ status: 403, description: 'Sin permisos (requiere rol superadmin)' })
+  @ApiResponse({
+    status: 403,
+    description: 'Sin permisos (requiere rol superadmin)',
+  })
   @ApiResponse({ status: 404, description: 'Propiedad no encontrada' })
   async createForAdmin(
     @Body() dto: CreateTaskByAdminDto,
@@ -228,7 +254,10 @@ export class TaskController {
     type: TaskResponseDto,
   })
   @ApiResponse({ status: 401, description: 'No autenticado' })
-  @ApiResponse({ status: 403, description: 'Sin permisos (requiere rol superadmin)' })
+  @ApiResponse({
+    status: 403,
+    description: 'Sin permisos (requiere rol superadmin)',
+  })
   @ApiResponse({ status: 404, description: 'Tarea no encontrada' })
   async getForAdmin(@Param('id') id: string): Promise<TaskResponseDto> {
     return this.taskService.getForAdmin(id);
@@ -248,7 +277,10 @@ export class TaskController {
     type: TaskListResponseDto,
   })
   @ApiResponse({ status: 401, description: 'No autenticado' })
-  @ApiResponse({ status: 403, description: 'Sin permisos (requiere rol superadmin)' })
+  @ApiResponse({
+    status: 403,
+    description: 'Sin permisos (requiere rol superadmin)',
+  })
   @ApiResponse({ status: 404, description: 'Propiedad no encontrada' })
   async listByPropertyForAdmin(
     @Param('propertyId') propertyId: string,
@@ -270,7 +302,10 @@ export class TaskController {
     type: TaskResponseDto,
   })
   @ApiResponse({ status: 401, description: 'No autenticado' })
-  @ApiResponse({ status: 403, description: 'Sin permisos (requiere rol superadmin)' })
+  @ApiResponse({
+    status: 403,
+    description: 'Sin permisos (requiere rol superadmin)',
+  })
   @ApiResponse({ status: 404, description: 'Tarea no encontrada' })
   async updateForAdmin(
     @Param('id') id: string,
@@ -290,7 +325,10 @@ export class TaskController {
   @ApiParam({ name: 'id', description: 'ID de la tarea' })
   @ApiResponse({ status: 204, description: 'Tarea eliminada exitosamente' })
   @ApiResponse({ status: 401, description: 'No autenticado' })
-  @ApiResponse({ status: 403, description: 'Sin permisos (requiere rol superadmin)' })
+  @ApiResponse({
+    status: 403,
+    description: 'Sin permisos (requiere rol superadmin)',
+  })
   @ApiResponse({ status: 404, description: 'Tarea no encontrada' })
   async removeForAdmin(@Param('id') id: string): Promise<void> {
     await this.taskService.removeForAdmin(id);

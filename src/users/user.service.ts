@@ -2,14 +2,28 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './user.model';
-import { CreateUserDto } from './dtos/create-user.dto';
-import {
-  UpdateUserByAdminDto,
-  UpdateUserProfileDto,
-} from './dtos/update-user.dto';
-import { UserListResponseDto, UserResponseDto } from './dtos/response-user.dto';
 import * as bcrypt from 'bcryptjs';
 import { Property } from 'src/properties/property.model';
+
+interface CreateUserDto {
+  name: string;
+  email: string;
+  password: string;
+  role: string;
+}
+
+interface UpdateUserByAdminDto {
+  name?: string;
+  email?: string;
+  password?: string;
+  role?: string;
+}
+
+interface UpdateUserProfileDto {
+  name?: string;
+  email?: string;
+  password?: string;
+}
 
 export type SafeUser = Omit<User, 'password'>;
 
@@ -24,7 +38,12 @@ export class UserService {
 
   async create(dto: CreateUserDto): Promise<SafeUser> {
     const hashedPassword = await bcrypt.hash(dto.password, 10);
-    const user = this.userRepo.create({ ...dto, password: hashedPassword });
+    const user = this.userRepo.create({
+      name: dto.name,
+      email: dto.email,
+      password: hashedPassword,
+      role: dto.role as any,
+    });
     const saved = await this.userRepo.save(user);
     return this.toSafeUser(saved);
   }
@@ -45,7 +64,11 @@ export class UserService {
     id: string,
     dto: Partial<UpdateUserByAdminDto>,
   ): Promise<SafeUser | null> {
-    const updatePayload: Partial<User> = { ...dto };
+    const updatePayload: any = {};
+
+    if (dto.name) updatePayload.name = dto.name;
+    if (dto.email) updatePayload.email = dto.email;
+    if (dto.role) updatePayload.role = dto.role;
 
     if (dto.password) {
       updatePayload.password = await bcrypt.hash(dto.password, 10);
@@ -120,24 +143,6 @@ export class UserService {
       return null;
     }
     return this.toSafeUser(user);
-  }
-
-  toResponseDto(user: SafeUser): UserResponseDto {
-    return {
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      role: user.role,
-      createdAt: user.createdAt,
-      updatedAt: user.updatedAt,
-    };
-  }
-
-  toListResponse(users: SafeUser[]): UserListResponseDto {
-    return {
-      users: users.map((user) => this.toResponseDto(user)),
-      total: users.length,
-    };
   }
 
   private toSafeUser(user: User): SafeUser {

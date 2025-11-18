@@ -83,7 +83,8 @@ export class PropertyController {
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Crear propiedad (Agente)',
-    description: 'El agente crea una propiedad y se asigna como owner automáticamente',
+    description:
+      'El agente crea una propiedad y se asigna como owner automáticamente',
   })
   @ApiResponse({
     status: 201,
@@ -91,7 +92,10 @@ export class PropertyController {
     type: PropertyResponseDto,
   })
   @ApiResponse({ status: 401, description: 'No autenticado' })
-  @ApiResponse({ status: 403, description: 'Sin permisos (requiere rol agente)' })
+  @ApiResponse({
+    status: 403,
+    description: 'Sin permisos (requiere rol agente)',
+  })
   async createForAgent(
     @Req() req: AuthenticatedRequest,
     @Body() dto: CreatePropertyByAgentDto,
@@ -149,7 +153,8 @@ export class PropertyController {
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Crear propiedad (Admin)',
-    description: 'El superadmin puede crear una propiedad y asignar cualquier owner',
+    description:
+      'El superadmin puede crear una propiedad y asignar cualquier owner',
   })
   @ApiResponse({
     status: 201,
@@ -157,7 +162,10 @@ export class PropertyController {
     type: PropertyResponseDto,
   })
   @ApiResponse({ status: 401, description: 'No autenticado' })
-  @ApiResponse({ status: 403, description: 'Sin permisos (requiere rol superadmin)' })
+  @ApiResponse({
+    status: 403,
+    description: 'Sin permisos (requiere rol superadmin)',
+  })
   @ApiResponse({ status: 404, description: 'Owner no encontrado' })
   async createForAdmin(
     @Body() dto: CreatePropertyByAdminDto,
@@ -179,7 +187,10 @@ export class PropertyController {
     type: PropertyResponseDto,
   })
   @ApiResponse({ status: 401, description: 'No autenticado' })
-  @ApiResponse({ status: 403, description: 'Sin permisos (requiere rol superadmin)' })
+  @ApiResponse({
+    status: 403,
+    description: 'Sin permisos (requiere rol superadmin)',
+  })
   @ApiResponse({ status: 404, description: 'Propiedad no encontrada' })
   async updateForAdmin(
     @Param('id') id: string,
@@ -200,7 +211,10 @@ export class PropertyController {
   @ApiParam({ name: 'id', description: 'ID de la propiedad' })
   @ApiResponse({ status: 204, description: 'Propiedad eliminada exitosamente' })
   @ApiResponse({ status: 401, description: 'No autenticado' })
-  @ApiResponse({ status: 403, description: 'Sin permisos (requiere rol superadmin)' })
+  @ApiResponse({
+    status: 403,
+    description: 'Sin permisos (requiere rol superadmin)',
+  })
   @ApiResponse({ status: 404, description: 'Propiedad no encontrada' })
   async removeForAdmin(@Param('id') id: string): Promise<void> {
     await this.propertyService.removeForAdmin(id);

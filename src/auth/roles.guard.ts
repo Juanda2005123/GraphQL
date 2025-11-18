@@ -5,6 +5,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
+import { GqlExecutionContext } from '@nestjs/graphql';
 import { Request } from 'express';
 
 import { ROLES_KEY } from './roles.decorator';
@@ -14,6 +15,10 @@ interface AuthenticatedRequestUser {
 }
 
 type AuthenticatedRequest = Request & { user?: AuthenticatedRequestUser };
+
+interface GraphQLContext {
+  req: AuthenticatedRequest;
+}
 
 @Injectable()
 export class RolesGuard implements CanActivate {
@@ -27,7 +32,9 @@ export class RolesGuard implements CanActivate {
     if (!requiredRoles) {
       return true;
     }
-    const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
+
+    // Obtener request desde REST o GraphQL
+    const request = this.getRequest(context);
     const userRole = request.user?.role;
 
     if (!userRole) {
@@ -35,5 +42,19 @@ export class RolesGuard implements CanActivate {
     }
 
     return requiredRoles.includes(userRole);
+  }
+
+  private getRequest(context: ExecutionContext): AuthenticatedRequest {
+    // Intentar obtener contexto GraphQL
+    const gqlContext = GqlExecutionContext.create(context);
+    const ctx = gqlContext.getContext<GraphQLContext>();
+
+    // Si existe request en GraphQL context, usarlo
+    if (ctx?.req) {
+      return ctx.req;
+    }
+
+    // Si no, es REST, usar el método tradicional
+    return context.switchToHttp().getRequest<AuthenticatedRequest>();
   }
 }
