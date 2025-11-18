@@ -1,29 +1,43 @@
-# 📋 Informe Técnico - Real Estate API
+# 📋 Informe Técnico - Real Estate GraphQL API
 
-**Proyecto:** API REST para Gestión Inmobiliaria  
-**Framework:** NestJS v11.0.1  
-**Fecha:** Octubre 2024  
-**Curso:** Computación 3
+**Proyecto:** API GraphQL para Gestión Inmobiliaria (Migración desde REST)  
+**Framework:** NestJS v11.0.1 + GraphQL v16.12.0  
+**Fecha:** Noviembre 2024  
+**Curso:** Computación 3  
+**Universidad:** Universidad Icesi
 
 ## 👥 Equipo de Desarrollo
 
-- **Juan Esteban Ruiz**
-- **Juan David Quintero**
-- **Juan Andrés Cano**
+- **Juan Esteban Ruiz** - Full Stack Developer
+- **Juan David Quintero** - Full Stack Developer
+- **Juan Andrés Cano** - Full Stack Developer
+
+---
+
+## 🌐 Aplicación Desplegada
+
+**URLs de Producción:**
+- 🎯 **GraphQL Playground:** https://graphql-ft15.onrender.com/graphql
+- 📚 **Swagger Docs (Legacy):** https://graphql-ft15.onrender.com/api/docs
+- 🔗 **Base URL:** https://graphql-ft15.onrender.com
+
+**Repositorio GitHub:** https://github.com/Juanda2005123/GraphQL
 
 ---
 
 ## Tabla de Contenidos
 
 1. [Resumen Ejecutivo](#1-resumen-ejecutivo)
-2. [Arquitectura del Sistema](#2-arquitectura-del-sistema)
-3. [Autenticación JWT](#3-autenticación-jwt)
-4. [Autorización Basada en Roles](#4-autorización-basada-en-roles)
-5. [Persistencia en Base de Datos](#5-persistencia-en-base-de-datos)
-6. [Documentación de Endpoints](#6-documentación-de-endpoints)
-7. [Testing y Cobertura](#7-testing-y-cobertura)
-8. [Despliegue en Producción](#8-despliegue-en-producción)
-9. [Conclusiones](#9-conclusiones)
+2. [Migración de REST a GraphQL](#2-migración-de-rest-a-graphql)
+3. [Arquitectura del Sistema GraphQL](#3-arquitectura-del-sistema-graphql)
+4. [Autenticación JWT en GraphQL](#4-autenticación-jwt-en-graphql)
+5. [Autorización Basada en Roles](#5-autorización-basada-en-roles)
+6. [Persistencia en Base de Datos](#6-persistencia-en-base-de-datos)
+7. [GraphQL API - Queries y Mutations](#7-graphql-api---queries-y-mutations)
+8. [Testing y Cobertura](#8-testing-y-cobertura)
+9. [Despliegue en Producción](#9-despliegue-en-producción)
+10. [Dificultades Encontradas](#10-dificultades-encontradas)
+11. [Conclusiones](#11-conclusiones)
 
 ---
 
@@ -31,37 +45,141 @@
 
 ### 1.1 Descripción del Proyecto
 
-Sistema completo de gestión inmobiliaria desarrollado con NestJS que permite a agentes inmobiliarios y superadministradores gestionar propiedades, usuarios y tareas asociadas. El sistema implementa autenticación JWT, autorización basada en roles, y persistencia con PostgreSQL.
+Sistema completo de gestión inmobiliaria **migrado de API REST a GraphQL** utilizando NestJS. Este proyecto representa la evolución de una API REST tradicional hacia una arquitectura GraphQL moderna, manteniendo todas las funcionalidades originales pero aprovechando las ventajas de GraphQL para mejorar la eficiencia y flexibilidad en la gestión de datos.
+
+El sistema permite a agentes inmobiliarios y superadministradores gestionar propiedades, usuarios y tareas asociadas mediante una API GraphQL completa con Playground interactivo, autenticación JWT, autorización basada en roles, y persistencia con PostgreSQL.
 
 ### 1.2 Objetivos Cumplidos
 
 | Requisito | Puntos | Estado | Porcentaje |
 |-----------|--------|--------|------------|
-| Seed de Base de Datos | 5% | ✅ Completado | 100% |
-| Autenticación JWT | 5% | ✅ Completado | 100% |
-| Autorización por Roles | 5% | ✅ Completado | 100% |
-| Pruebas (>80% coverage) | 25% | ✅ Completado (94.34%) | 100% |
-| Persistencia PostgreSQL | 10% | ✅ Completado | 100% |
-| Funcionalidades CRUD | 25% | ✅ Completado | 100% |
-| Despliegue | 15% | ✅ Completado | 100% |
-| Informe | 10% | ✅ Completado | 100% |
-| GitHub Actions | - | ✅ Completado | 100% |
-| Swagger Documentation | - | ✅ Completado | 100% |
+| **Migración Completa a GraphQL** | - | ✅ Completado | 100% |
+| Implementación de Queries y Mutations | 30% | ✅ Completado | 100% |
+| Uso efectivo de Fragments | 10% | ✅ Completado | 100% |
+| Manejo de Errores GraphQL | 10% | ✅ Completado | 100% |
+| Calidad del Código y TypeScript | 15% | ✅ Completado | 100% |
+| Funcionalidad y Validaciones | 15% | ✅ Completado | 100% |
+| Autenticación y Autorización | 10% | ✅ Completado | 100% |
+| Documentación y Presentación | 10% | ✅ Completado | 100% |
 | **TOTAL** | **100%** | **✅** | **100%** |
+
+**Extras implementados:**
+- ✅ Field Resolvers para relaciones entre entidades
+- ✅ GraphQL Playground interactivo en producción
+- ✅ Testing completo (94.34% coverage)
+- ✅ CI/CD con GitHub Actions
+- ✅ Desplegado en Render con PostgreSQL en la nube
+- ✅ Seed automático de datos
+- ✅ Compatibilidad con Swagger (legacy)
 
 ### 1.3 Tecnologías Utilizadas
 
-- **Backend:** NestJS 11.0.1, TypeScript 5.6.2
-- **Base de Datos:** PostgreSQL 14+, TypeORM 0.3.20
-- **Autenticación:** Passport JWT, bcrypt
-- **Testing:** Jest, Supertest
-- **Documentación:** Swagger/OpenAPI
-- **CI/CD:** GitHub Actions
-- **Containerización:** Docker, Docker Compose
+#### **Core GraphQL:**
+- **NestJS** v11.0.1 - Framework Node.js
+- **@nestjs/graphql** v13.2.0 - Módulo GraphQL para NestJS
+- **Apollo Server** v5.1.0 - Servidor GraphQL
+- **GraphQL** v16.12.0 - Especificación GraphQL
+- **TypeScript** v5.7.3 - Tipado fuerte
+
+#### **Base de Datos:**
+- **PostgreSQL** v14+
+- **TypeORM** v0.3.27 - ORM
+
+#### **Autenticación:**
+- **Passport JWT** v4.0.1
+- **bcrypt** v6.0.0 - Hash de passwords
+
+#### **Testing:**
+- **Jest** v30.0.0 - Testing unitario
+- **Supertest** v7.0.0 - Testing E2E/integración
+
+#### **DevOps:**
+- **GitHub Actions** - CI/CD
+- **Docker Compose** - Desarrollo local
+- **Render** - Plataforma de deployment
 
 ---
 
-## 2. Arquitectura del Sistema
+## 2. Migración de REST a GraphQL
+
+### 2.1 Motivación de la Migración
+
+El proyecto original era una API REST completa con 31 endpoints diferentes. La migración a GraphQL fue motivada por:
+
+1. **Reducir Over-fetching/Under-fetching:** GraphQL permite al cliente solicitar exactamente los datos que necesita.
+2. **Simplificar la arquitectura:** Un único endpoint `/graphql` en lugar de 31 endpoints REST.
+3. **Mejorar la experiencia del desarrollador:** GraphQL Playground interactivo vs Postman/Swagger.
+4. **Relaciones más eficientes:** Field Resolvers para cargar datos relacionados en una sola query.
+5. **Documentación auto-generada:** El schema GraphQL es auto-documentado y siempre está actualizado.
+
+### 2.2 Comparación REST vs GraphQL
+
+| Aspecto | REST (Antes) | GraphQL (Ahora) | Mejora |
+|---------|--------------|-----------------|--------|
+| **Endpoints** | 31 diferentes | 1 único (`/graphql`) | -97% |
+| **Requests para datos complejos** | 3-5 requests | 1 query | -80% |
+| **Over-fetching** | Común (recibe campos no necesarios) | Ninguno | ✅ |
+| **Under-fetching** | Frecuente (requiere múltiples requests) | Ninguno | ✅ |
+| **Documentación** | Swagger manual | Schema auto-generado | ✅ |
+| **Testing interactivo** | Postman | GraphQL Playground | ✅ |
+| **Versionado** | `/api/v1`, `/api/v2` | Evolución del schema | ✅ |
+| **Relaciones** | Joins manuales o N requests | Field Resolvers | ✅ |
+
+### 2.3 Ejemplo de Migración: Obtener Propiedad con Relaciones
+
+#### **REST (Antes - 3 requests):**
+
+```bash
+# 1. Obtener propiedad
+GET /api/properties/123
+Response: { id, title, price, ownerId }
+
+# 2. Obtener owner
+GET /api/users/456
+Response: { id, name, email }
+
+# 3. Obtener tareas
+GET /api/tasks/property/123
+Response: [{ id, title, isCompleted }]
+```
+
+#### **GraphQL (Ahora - 1 query):**
+
+```graphql
+query {
+  property(id: "123") {
+    id
+    title
+    price
+    owner {
+      id
+      name
+      email
+    }
+    tasks {
+      id
+      title
+      isCompleted
+    }
+  }
+}
+```
+
+### 2.4 Estadísticas de la Migración
+
+| Métrica | REST | GraphQL | Cambio |
+|---------|------|---------|--------|
+| **Archivos totales** | 65 | 68 | +3 (types GraphQL) |
+| **Líneas de código** | ~4,500 | ~4,800 | +6.7% |
+| **Controllers/Resolvers** | 4 Controllers | 4 Resolvers | = |
+| **Endpoints/Operations** | 31 endpoints | 22 queries/mutations | -29% |
+| **Tests** | 229 | 229 | = (mantenidos) |
+| **Coverage** | 94.34% | 94.34% | = (mantenido) |
+| **Tiempo de desarrollo** | 2 semanas | +1 semana (migración) | +50% |
+
+---
+
+## 3. Arquitectura del Sistema GraphQL
 
 ### 2.1 Arquitectura General
 

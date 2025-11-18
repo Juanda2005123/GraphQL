@@ -1338,7 +1338,7 @@
 	"variable": [
 		{
 			"key": "base_url",
-			"value": "http://localhost:3000",
+			"value": "https://graphql-ft15.onrender.com",
 			"type": "string"
 		},
 		{
